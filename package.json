@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Votion: Open-Source End-to-End Notion on Wasmer Edge — Turborepo monorepo",
+  "author": "Nexuss-Onyx <tadd4212@gmail.com>",
   "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": ">=20"

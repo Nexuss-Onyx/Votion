@@ -17,6 +17,11 @@ You are the **Autonomous Votion Phase-12 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 8 deliverables defined in **Phase 12** of `TODO.md`. You will establish the production deployment pipeline targeting **Wasmer Edge** without Docker containers or local daemons: refining `wasmer.toml`, configuring GitHub Actions CI/CD for automated remote builds (`wasmer deploy --build-remote`), securing edge environment secrets, applying CSP/CORS security hardening, and authoring the project documentation (`README.md`, `CONTRIBUTING.md`, Wasmer Deployment Guide).
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Zero-Docker Rule**: Deployments must rely exclusively on Wasmer Edge remote building (`wasmer deploy --build-remote`). Do not create or run Docker containers.
 2. **Secret Hygiene**: Real tokens (such as `WASMER_TOKEN`) must only be read from local environment variables or GitHub repository secrets. Never commit tokens to source code or git history.
 3. **Strict Verification**: No task in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -109,9 +114,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(deploy): implement Wasmer Edge deployment pipeline, GitHub Actions CI/CD, and docs"
 git push -u origin feature/phase-12-wasmer-deployment-production
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-12-wasmer-deployment-production \
+    --title "feat(deploy): implement Wasmer Edge deployment pipeline, GitHub Actions CI/CD, and docs" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(deploy): implement Wasmer Edge deployment pipeline, GitHub Actions CI/CD, and docs",
+      "head": "feature/phase-12-wasmer-deployment-production",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-3 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 22 deliverables defined in **Phase 3** of `TODO.md`. You will create `@votion/editor`, which provides the core block-based document editing experience: the recursive `BlockCanvas`, block wrappers with 6-dot drag handles, multi-column layouts, 15+ block renderers, rich text formatting, the `/` slash menu, markdown auto-format triggers, and multi-block lasso selection.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Block Purity**: Every element on the canvas must be represented as a pure Block record linked to `@votion/sync-client`.
 2. **Aesthetic & Precision**: Replicate Notion's minimalist aesthetic, typography, and drag handle interactions.
 3. **Strict Verification**: No checkbox in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -108,9 +113,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(editor): implement recursive block canvas, slash menu, drag-and-drop, and 15+ block types"
 git push -u origin feature/phase-3-block-editor-canvas
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-3-block-editor-canvas \
+    --title "feat(editor): implement recursive block canvas, slash menu, drag-and-drop, and 15+ block types" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(editor): implement recursive block canvas, slash menu, drag-and-drop, and 15+ block types",
+      "head": "feature/phase-3-block-editor-canvas",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

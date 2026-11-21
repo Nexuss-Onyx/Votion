@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-5 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 14 deliverables defined in **Phase 5** of `TODO.md`. You will create `apps/server`, a high-throughput Fastify API server running on Node.js / Wasmer Edge that executes the core `POST /api/v3/saveTransactions` pipeline, user authentication with JWTs, `POST /api/v3/loadPageChunk`, database query execution, presigned URL generation for Cloudflare R2 / AWS S3, and Redis Pub/Sub invalidation publishing.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **ACID Transaction Atomicity**: All operations in a transaction batch must execute in a single SQL transaction. If one fails, the entire batch rolls back.
 2. **Zero-Docker Rule**: Connect directly to cloud serverless PostgreSQL (Neon) and Upstash Redis via environment variables. Do not use local Docker containers.
 3. **Strict Verification**: No task in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -99,9 +104,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(server): implement Fastify transaction API, loadPageChunk, auth, and S3 presigned URLs"
 git push -u origin feature/phase-5-backend-transaction-server
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-5-backend-transaction-server \
+    --title "feat(server): implement Fastify transaction API, loadPageChunk, auth, and S3 presigned URLs" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(server): implement Fastify transaction API, loadPageChunk, auth, and S3 presigned URLs",
+      "head": "feature/phase-5-backend-transaction-server",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

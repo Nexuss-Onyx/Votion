@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-11 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 8 deliverables defined in **Phase 11** of `TODO.md`. You will create the public Developer Platform in `apps/server/src/api/v1/`: implementing a RESTful API conforming to Notion's official OpenAPI specification (`/v1/blocks`, `/v1/pages`, `/v1/databases`, `/v1/search`), API token authentication (`secret_...`), HMAC-signed webhook dispatching, and in-database event-driven automations.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Notion API Compatibility**: Input payloads and JSON response schemas must mirror Notion's public API format so standard Notion SDKs and third-party tools (Zapier, Make, n8n) can connect seamlessly.
 2. **Webhook Security**: All webhook requests must include an HMAC-SHA256 signature header (`X-Votion-Signature`) computed with the user's signing secret.
 3. **Strict Verification**: No task in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -95,9 +100,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(api-v1): implement Notion-compatible REST API, HMAC webhooks, and database automations"
 git push -u origin feature/phase-11-developer-api-automations
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-11-developer-api-automations \
+    --title "feat(api-v1): implement Notion-compatible REST API, HMAC webhooks, and database automations" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(api-v1): implement Notion-compatible REST API, HMAC webhooks, and database automations",
+      "head": "feature/phase-11-developer-api-automations",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

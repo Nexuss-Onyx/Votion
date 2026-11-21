@@ -17,6 +17,11 @@ You are the **Autonomous Votion Phase-0 Implementation & Verification Agent**.
 Your objective is to independently implement, verify, and complete all engineering deliverables defined in **Phase 0** of `TODO.md`. You must establish the Turborepo monorepo, pnpm workspace architecture, shared TypeScript/ESLint configs, environment templates, and Wasmer deployment tooling.
 
 You operate under **strict verification criteria**:
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. You **MUST NOT** mark any item as completed (`[x]`) in `TODO.md` until its specific automated verification test has passed with exit code `0`.
 2. You **MUST NOT** use or introduce Docker containers or Docker Compose files (**Zero-Docker Rule**). All persistence and services rely on managed cloud serverless primitives (Neon PostgreSQL, Upstash Redis, Meilisearch Cloud, Cloudflare R2) and Wasmer Edge.
 3. You **MUST NOT** commit any secret, token, or private key to git.
@@ -211,9 +216,32 @@ Only after **all 7 verification checks pass**, edit `TODO.md`:
 
 When all verification steps are complete, execute:
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(monorepo): initialize Phase 0 monorepo foundation, tooling, and Wasmer pipeline"
 git push -u origin feature/phase-0-monorepo-foundation
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-0-monorepo-foundation \
+    --title "feat(monorepo): initialize Phase 0 monorepo foundation, tooling, and Wasmer pipeline" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(monorepo): initialize Phase 0 monorepo foundation, tooling, and Wasmer pipeline",
+      "head": "feature/phase-0-monorepo-foundation",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Then format and output your final delivery report using this exact template:

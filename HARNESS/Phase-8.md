@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-8 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 7 deliverables defined in **Phase 8** of `TODO.md`. You will create `@votion/search`, which powers Notion's instant `Cmd+K` Quick Find modal: setting up Meilisearch Cloud index schemas, building the `DocumentTransformer` to strip rich-text tuples into clean search tokens, building the `QuickFindQueryBuilder` with typo-tolerance and scoped filters, and implementing the frontend search modal.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Typo Tolerance & Latency**: Quick Find queries must execute in under 50ms with prefix matching and typo tolerance.
 2. **Permission Scoping**: Search results must be strictly scoped to workspaces and sub-trees where the querying user has `read` access.
 3. **Strict Verification**: No task in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -103,9 +108,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(search): implement Meilisearch schema, document transformer, and Cmd+K Quick Find modal"
 git push -u origin feature/phase-8-search-discovery-engine
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-8-search-discovery-engine \
+    --title "feat(search): implement Meilisearch schema, document transformer, and Cmd+K Quick Find modal" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(search): implement Meilisearch schema, document transformer, and Cmd+K Quick Find modal",
+      "head": "feature/phase-8-search-discovery-engine",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

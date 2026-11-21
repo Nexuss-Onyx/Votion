@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-6 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 9 deliverables defined in **Phase 6** of `TODO.md`. You will create `apps/sync-worker`, a high-concurrency WebSocket gateway that multiplexes persistent client connections, handles room subscriptions (`space:<space_id>`, `page:<page_id>`), bridges database mutation events from Redis Pub/Sub, and manages live presence (cursor trails, active block focus) with Redis TTL expiration.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Low Latency**: Presence messages and delta invalidations must fan out to subscribed room clients with under 100ms latency.
 2. **Ephemeral Presence**: Presence states must never touch persistent SQL databases. Store them exclusively in memory or Redis with short (10s) TTLs.
 3. **Strict Verification**: No task in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -92,9 +97,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(sync-worker): implement WebSocket realtime gateway, Redis PubSub bridge, and presence hub"
 git push -u origin feature/phase-6-realtime-sync-worker
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-6-realtime-sync-worker \
+    --title "feat(sync-worker): implement WebSocket realtime gateway, Redis PubSub bridge, and presence hub" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(sync-worker): implement WebSocket realtime gateway, Redis PubSub bridge, and presence hub",
+      "head": "feature/phase-6-realtime-sync-worker",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

@@ -3,6 +3,7 @@ name = "votion/votion-app"
 version = "0.1.0"
 description = "Votion: Open-Source End-to-End Notion on Wasmer Edge"
 license = "MIT"
+authors = ["Nexuss-Onyx <tadd4212@gmail.com>"]
 
 [[services]]
 name = "web"

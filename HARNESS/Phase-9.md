@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-9 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 11 deliverables defined in **Phase 9** of `TODO.md`. You will create `apps/task-worker`, which consumes asynchronous background job queues using BullMQ on Redis: cascading soft-deletes down deep page trees, updating search indexes in Meilisearch, recalculating dependent database rollups, resizing media images with Sharp, scraping OpenGraph link previews, and processing Markdown/CSV/PDF export and import tasks.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Asynchronous Decoupling**: Heavy tasks (PDF rendering, large sub-tree cascading, batch indexing) must never block HTTP transaction endpoints.
 2. **Idempotence**: Every worker job must be idempotent so that automatic retries do not produce duplicate records or inconsistent states.
 3. **Strict Verification**: No task in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -88,9 +93,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(task-worker): implement BullMQ worker fleet for cascade deletes, indexing, media, and export/import"
 git push -u origin feature/phase-9-background-worker-fleet
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-9-background-worker-fleet \
+    --title "feat(task-worker): implement BullMQ worker fleet for cascade deletes, indexing, media, and export/import" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(task-worker): implement BullMQ worker fleet for cascade deletes, indexing, media, and export/import",
+      "head": "feature/phase-9-background-worker-fleet",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

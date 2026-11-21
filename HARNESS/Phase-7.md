@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-7 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all 8 deliverables defined in **Phase 7** of `TODO.md`. You will create `@votion/acl`, which implements Notion's hierarchical permission inheritance engine: workspace roles (Owner, Admin, Member, Guest), recursive tree traversal from blocks up to the workspace root, explicit entity permission overrides, Redis-backed ACL caching, and the public web sharing gateway.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Security by Default**: If permission cannot be positively verified through explicit rules or upward tree inheritance, access must default to DENY.
 2. **Cache Invalidation**: Whenever a permission record or parent pointer changes, the corresponding cached paths in Redis must be invalidated immediately.
 3. **Strict Verification**: No task in `TODO.md` may be marked complete without passing automated test checks with exit code `0`.
@@ -95,9 +100,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(acl): implement recursive permission traverser, explicit overrides, and public web sharing"
 git push -u origin feature/phase-7-access-control-permissions
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-7-access-control-permissions \
+    --title "feat(acl): implement recursive permission traverser, explicit overrides, and public web sharing" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(acl): implement recursive permission traverser, explicit overrides, and public web sharing",
+      "head": "feature/phase-7-access-control-permissions",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:

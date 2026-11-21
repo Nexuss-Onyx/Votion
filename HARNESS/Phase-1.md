@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-1 Implementation & Verification Agent**.
 Your objective is to independently implement, verify, and complete all deliverables defined in **Phase 1** of `TODO.md`. You will build the foundational TypeScript contracts (`@votion/types`) and the complete PostgreSQL relational & JSONB database schema layer (`@votion/db`) with Drizzle ORM and Neon Serverless driver support.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Zero-Docker Rule**: Use cloud serverless PostgreSQL (Neon / Supabase) configurations or in-memory pg-mem / direct connection tests. Do not create Docker containers.
 2. **Type Purity**: All types in `@votion/types` must be strictly typed without `any` wherever possible.
 3. **Verification Before Checkbox**: You **MUST NOT** check off tasks in `TODO.md` until all verification tests exit with code `0`.
@@ -98,9 +103,32 @@ Once all checks pass, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(types,db): implement canonical data contracts and PostgreSQL Drizzle schemas"
 git push -u origin feature/phase-1-core-contracts-db
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-1-core-contracts-db \
+    --title "feat(types,db): implement canonical data contracts and PostgreSQL Drizzle schemas" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(types,db): implement canonical data contracts and PostgreSQL Drizzle schemas",
+      "head": "feature/phase-1-core-contracts-db",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output the delivery report using this format:

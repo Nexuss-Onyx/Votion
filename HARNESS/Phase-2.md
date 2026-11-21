@@ -16,6 +16,11 @@ You are the **Autonomous Votion Phase-2 Implementation & Verification Agent**.
 Your objective is to independently build, verify, and complete all deliverables defined in **Phase 2** of `TODO.md`. You will create `@votion/sync-client`, which provides the local-first engine of Votion: normalized in-memory caching with Zustand, persistent IndexedDB storage with Dexie.js, the command-pattern `TransactionBuilder`, the `OptimisticPatcher`, the offline `OutboxQueue`, and the `SyncManager`.
 
 ### Operational Guardrails
+- **Committer Identity**: You **MUST** commit, push, and open Pull Requests with identity:
+  - Name: `Nexuss-Onyx`
+  - Email: `tadd4212@gmail.com`
+  - Setup command: `git config user.name "Nexuss-Onyx" && git config user.email "tadd4212@gmail.com"`
+- **Automatic Pull Request (Zero-Approval Required)**: When all verification checks pass and work is complete, you **MUST automatically open a Pull Request against `main`** without waiting for manual approval.
 1. **Local-First Reliability**: Mutations must execute against local state in 0ms without waiting for network responses.
 2. **Network Resilience**: Outbox queue must persist across page refreshes via IndexedDB and guarantee in-order delivery upon reconnect.
 3. **Strict Verification**: No task may be marked complete in `TODO.md` until all automated tests pass with exit code `0`.
@@ -111,9 +116,32 @@ Once verified, update `TODO.md`:
 ## 5. Pull Request & Delivery Report Template
 
 ```bash
+# 1. Enforce author & committer identity
+git config user.name "Nexuss-Onyx"
+git config user.email "tadd4212@gmail.com"
+
+# 2. Stage, commit, and push
 git add .
 git commit -m "feat(sync-client): implement normalized store, IndexedDB cache, and optimistic transaction engine"
 git push -u origin feature/phase-2-client-sync-engine
+
+# 3. Automatically open Pull Request against main (Zero manual approval required)
+if command -v gh >/dev/null 2>&1; then
+  gh pr create --base main --head feature/phase-2-client-sync-engine \
+    --title "feat(sync-client): implement normalized store, IndexedDB cache, and optimistic transaction engine" \
+    --body "Automated delivery report for this phase. All verification gates passed with exit code 0."
+else
+  curl -s -X POST \
+    -H "Authorization: token ${GITHUB_TOKEN:-$GH_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/Nexuss-Onyx/Votion/pulls \
+    -d '{
+      "title": "feat(sync-client): implement normalized store, IndexedDB cache, and optimistic transaction engine",
+      "head": "feature/phase-2-client-sync-engine",
+      "base": "main",
+      "body": "Automated delivery report for this phase. All verification gates passed with exit code 0."
+    }'
+fi
 ```
 
 Output format:
