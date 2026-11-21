@@ -1,0 +1,19 @@
+[package]
+name = "votion/votion-app"
+version = "0.1.0"
+description = "Votion: Open-Source End-to-End Notion on Wasmer Edge"
+license = "MIT"
+
+[[services]]
+name = "web"
+kind = "http"
+runner = "https://webc.org/runner/node"
+
+[services.annotations]
+routes = ["/*"]
+
+[env]
+DATABASE_URL = { secret = "DATABASE_URL" }
+REDIS_URL = { secret = "REDIS_URL" }
+S3_ENDPOINT = { secret = "S3_ENDPOINT" }
+S3_BUCKET = "votion-media"
