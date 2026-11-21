@@ -1,0 +1,50 @@
+{
+  "name": "@votion/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Votion PostgreSQL schema, migrations & Drizzle client (Neon Serverless / node-postgres)",
+  "author": "Nexuss-Onyx <tadd4212@gmail.com>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./dist/schema/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.test.json --noEmit && vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:check": "drizzle-kit check",
+    "drizzle-kit": "drizzle-kit",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.1",
+    "@votion/types": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "@votion/eslint-config": "workspace:*",
+    "@votion/typescript-config": "workspace:*",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
+  }
+}

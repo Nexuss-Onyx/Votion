@@ -11,7 +11,7 @@
 | Subsystem / Phase | Package / App | Status | Tasks Completed |
 | :--- | :--- | :---: | :---: |
 | **Phase 0: Monorepo & Infrastructure** | `tooling/*`, `wasmer.toml` | ✅ Completed | 8 / 8 |
-| **Phase 1: Core Contracts & Database** | `@votion/types`, `@votion/db` | ⬜ Not Started | 0 / 12 |
+| **Phase 1: Core Contracts & Database** | `@votion/types`, `@votion/db` | ✅ Completed | 12 / 12 |
 | **Phase 2: Client State & Offline Engine**| `@votion/sync-client` | ⬜ Not Started | 0 / 10 |
 | **Phase 3: Block Editor & Canvas** | `@votion/editor` | ⬜ Not Started | 0 / 22 |
 | **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ⬜ Not Started | 0 / 20 |
@@ -48,30 +48,30 @@
 ## Phase 1: Shared Core Contracts & Database Tier (`@votion/types`, `@votion/db`)
 
 ### 1.1 Type Definitions (`packages/types`)
-- [ ] Define Rich Text data model (`RichText`, `RichTextSegment`, `TextModifier`).
-- [ ] Define canonical `Block` interface with all primitive and container types:
-  - [ ] `page`, `text`, `heading_1`, `heading_2`, `heading_3`
-  - [ ] `bulleted_list_item`, `numbered_list_item`, `to_do`, `toggle`
-  - [ ] `quote`, `callout`, `divider`, `column_list`, `column`
-  - [ ] `table`, `collection_view`, `synced_block`, `code`, `math`
-  - [ ] `image`, `video`, `audio`, `file`, `pdf`, `bookmark`
-- [ ] Define `Collection` and `CollectionProperty` interfaces (Title, Select, Status, Relation, Rollup, Formula, etc.).
-- [ ] Define `CollectionView` interface supporting 6 view types (`table`, `board`, `calendar`, `timeline`, `gallery`, `list`).
-- [ ] Define Transaction operation protocol (`Transaction`, `Operation`, `OperationPointer`, `OperationCommand`).
-- [ ] Define WebSocket event envelopes (`subscribe`, `presence`, `record_updated`).
+- [x] Define Rich Text data model (`RichText`, `RichTextSegment`, `TextModifier`).
+- [x] Define canonical `Block` interface with all primitive and container types:
+  - [x] `page`, `text`, `heading_1`, `heading_2`, `heading_3`
+  - [x] `bulleted_list_item`, `numbered_list_item`, `to_do`, `toggle`
+  - [x] `quote`, `callout`, `divider`, `column_list`, `column`
+  - [x] `table`, `collection_view`, `synced_block`, `code`, `math`
+  - [x] `image`, `video`, `audio`, `file`, `pdf`, `bookmark`
+- [x] Define `Collection` and `CollectionProperty` interfaces (Title, Select, Status, Relation, Rollup, Formula, etc.).
+- [x] Define `CollectionView` interface supporting 6 view types (`table`, `board`, `calendar`, `timeline`, `gallery`, `list`).
+- [x] Define Transaction operation protocol (`Transaction`, `Operation`, `OperationPointer`, `OperationCommand`).
+- [x] Define WebSocket event envelopes (`subscribe`, `presence`, `record_updated`).
 
 ### 1.2 Database Migrations & Models (`packages/db`)
-- [ ] Select ORM/Query builder (Drizzle ORM or Kysely with PostgreSQL driver).
-- [ ] Create SQL migration for `workspaces` and `workspace_members`.
-- [ ] Create SQL migration for `users` and authentication accounts.
-- [ ] Create SQL migration for `blocks` with JSONB `properties`, `format`, and UUID array `content`.
-- [ ] Create SQL migration for `collections` and `collection_views`.
-- [ ] Create SQL migration for `permissions` (entity-level ACL overrides).
-- [ ] Create SQL migration for `transaction_records` (Write-Ahead Log for sync).
-- [ ] Create composite database indexes:
-  - [ ] `idx_blocks_space_id`, `idx_blocks_parent_id`, `idx_blocks_alive`
-  - [ ] GIN index on `blocks.properties`
-  - [ ] GIN index on `collections.schema`
+- [x] Select ORM/Query builder (Drizzle ORM or Kysely with PostgreSQL driver).
+- [x] Create SQL migration for `workspaces` and `workspace_members`.
+- [x] Create SQL migration for `users` and authentication accounts.
+- [x] Create SQL migration for `blocks` with JSONB `properties`, `format`, and UUID array `content`.
+- [x] Create SQL migration for `collections` and `collection_views`.
+- [x] Create SQL migration for `permissions` (entity-level ACL overrides).
+- [x] Create SQL migration for `transaction_records` (Write-Ahead Log for sync).
+- [x] Create composite database indexes:
+  - [x] `idx_blocks_space_id`, `idx_blocks_parent_id`, `idx_blocks_alive`
+  - [x] GIN index on `blocks.properties`
+  - [x] GIN index on `collections.schema`
 
 ---
 
