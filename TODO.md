@@ -10,7 +10,7 @@
 
 | Subsystem / Phase | Package / App | Status | Tasks Completed |
 | :--- | :--- | :---: | :---: |
-| **Phase 0: Monorepo & Infrastructure** | `tooling/*`, `wasmer.toml` | ⬜ Not Started | 0 / 8 |
+| **Phase 0: Monorepo & Infrastructure** | `tooling/*`, `wasmer.toml` | ✅ Completed | 8 / 8 |
 | **Phase 1: Core Contracts & Database** | `@votion/types`, `@votion/db` | ⬜ Not Started | 0 / 12 |
 | **Phase 2: Client State & Offline Engine**| `@votion/sync-client` | ⬜ Not Started | 0 / 10 |
 | **Phase 3: Block Editor & Canvas** | `@votion/editor` | ⬜ Not Started | 0 / 22 |
@@ -28,20 +28,20 @@
 
 ## Phase 0: Monorepo Foundation & Tooling Setup
 
-- [ ] Initialize Turborepo monorepo with `pnpm` workspaces (`pnpm-workspace.yaml`).
-- [ ] Configure root `package.json` with workspace scripts (`build`, `dev`, `lint`, `test`, `typecheck`).
-- [ ] Set up `turbo.json` with task dependency pipelines and caching configurations.
-- [ ] Create shared TypeScript configuration package (`tooling/typescript-config` with `base.json`, `nextjs.json`, `node.json`).
-- [ ] Create shared ESLint & Prettier configuration package (`tooling/eslint-config`).
-- [ ] Install and verify Wasmer CLI (`~/.wasmer/bin/wasmer`).
-- [ ] Create root `wasmer.toml` application manifest.
-- [ ] Configure cloud-managed infrastructure connections:
-  - [ ] PostgreSQL 16 (Neon Serverless Postgres / Supabase with `uuid-ossp`, `pgcrypto`)
-  - [ ] Redis 7 (Upstash Serverless Redis / Redis Cloud)
-  - [ ] Meilisearch Cloud (v1.6+)
-  - [ ] Cloudflare R2 / AWS S3 (S3-compatible bucket with CORS configured)
-- [ ] Write `.env.example` defining environment variables and secrets across apps and packages.
-- [ ] Create automated local development startup script (`pnpm dev`).
+- [x] Initialize Turborepo monorepo with `pnpm` workspaces (`pnpm-workspace.yaml`).
+- [x] Configure root `package.json` with workspace scripts (`build`, `dev`, `lint`, `test`, `typecheck`).
+- [x] Set up `turbo.json` with task dependency pipelines and caching configurations.
+- [x] Create shared TypeScript configuration package (`tooling/typescript-config` with `base.json`, `nextjs.json`, `node.json`).
+- [x] Create shared ESLint & Prettier configuration package (`tooling/eslint-config`).
+- [x] Install and verify Wasmer CLI (`~/.wasmer/bin/wasmer`).
+- [x] Create root `wasmer.toml` application manifest.
+- [x] Configure cloud-managed infrastructure connections:
+  - [x] PostgreSQL 16 (Neon Serverless Postgres / Supabase with `uuid-ossp`, `pgcrypto`)
+  - [x] Redis 7 (Upstash Serverless Redis / Redis Cloud)
+  - [x] Meilisearch Cloud (v1.6+)
+  - [x] Cloudflare R2 / AWS S3 (S3-compatible bucket with CORS configured)
+- [x] Write `.env.example` defining environment variables and secrets across apps and packages.
+- [x] Create automated local development startup script (`pnpm dev`).
 
 ---
 

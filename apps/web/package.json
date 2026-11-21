@@ -1,0 +1,22 @@
+{
+  "name": "@votion/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Votion web application shell",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@votion/eslint-config": "workspace:*",
+    "@votion/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.4.5"
+  }
+}

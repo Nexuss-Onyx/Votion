@@ -30,3 +30,6 @@ Thumbs.db
 
 # Wasmer
 .wasmer/
+
+# Turborepo
+.turbo/

@@ -1,0 +1,20 @@
+{
+  "name": "@votion/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Votion backend API & transaction server",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@votion/eslint-config": "workspace:*",
+    "@votion/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  }
+}
