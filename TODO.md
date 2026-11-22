@@ -16,7 +16,7 @@
 | **Phase 3: Block Editor & Canvas** | `@votion/editor` | ⬜ Not Started | 0 / 22 |
 | **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ⬜ Not Started | 0 / 20 |
 | **Phase 5: Backend API & Transactions** | `apps/server` | ⬜ Not Started | 0 / 14 |
-| **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ⬜ Not Started | 0 / 9 |
+| **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ✅ Completed | 9 / 9 |
 | **Phase 7: Access Control & Permissions** | `@votion/acl` | ✅ Completed | 8 / 8 |
 | **Phase 8: Search & Discovery Engine** | `@votion/search` | ⬜ Not Started | 0 / 7 |
 | **Phase 9: Background Worker Fleet** | `apps/task-worker` | ⬜ Not Started | 0 / 11 |
@@ -238,18 +238,18 @@
 
 ## Phase 6: Real-Time Sync & WebSocket Collaboration Gateway (`apps/sync-worker`)
 
-- [ ] Bootstrap WebSocket server (using `ws` or `Socket.io`).
-- [ ] Implement client authentication handshake over WebSocket.
-- [ ] Build `SubscriptionManager`:
-  - [ ] Track subscribed rooms (`space:<space_id>`, `page:<page_id>`).
-  - [ ] Clean up subscriptions on client disconnect.
-- [ ] Build `RedisSubscriber`:
-  - [ ] Subscribe to Redis channel `space:*:events`.
-  - [ ] Broadcast `record_updated` patches to clients subscribed to that space.
-- [ ] Build Ephemeral Presence Engine:
-  - [ ] Relay client cursor positions (`x`, `y`) and focused block IDs.
-  - [ ] Set 10-second TTL in Redis for active user presence.
-  - [ ] Emit peer join/leave/move events to room members.
+- [x] Bootstrap WebSocket server (using `ws` or `Socket.io`).
+- [x] Implement client authentication handshake over WebSocket.
+- [x] Build `SubscriptionManager`:
+  - [x] Track subscribed rooms (`space:<space_id>`, `page:<page_id>`).
+  - [x] Clean up subscriptions on client disconnect.
+- [x] Build `RedisSubscriber`:
+  - [x] Subscribe to Redis channel `space:*:events`.
+  - [x] Broadcast `record_updated` patches to clients subscribed to that space.
+- [x] Build Ephemeral Presence Engine:
+  - [x] Relay client cursor positions (`x`, `y`) and focused block IDs.
+  - [x] Set 10-second TTL in Redis for active user presence.
+  - [x] Emit peer join/leave/move events to room members.
 
 ---
 

@@ -1,0 +1,40 @@
+{
+  "name": "@votion/sync-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Votion real-time WebSocket collaboration gateway (presence, rooms, Redis pub/sub)",
+  "author": "Nexuss-Onyx <tadd4212@gmail.com>",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test --ext .ts",
+    "test": "vitest run",
+    "test:auth": "vitest run test/auth.test.ts",
+    "test:pubsub": "vitest run test/pubsub.test.ts",
+    "test:presence": "vitest run test/presence.test.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@votion/types": "workspace:*",
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ioredis-mock": "^8.2.8",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.5.0",
+    "@types/ws": "^8.5.10",
+    "@votion/eslint-config": "workspace:*",
+    "@votion/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
+    "ioredis-mock": "^8.9.0",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
+  }
+}

@@ -37,11 +37,20 @@ export interface SelectionRange {
   end: number;
 }
 
+/**
+ * Why a presence frame was emitted: the first frame from a socket on a page
+ * is a `join`, subsequent frames are `move`s, and a disconnect or explicit
+ * removal emits a `leave`.
+ */
+export type PresenceAction = 'join' | 'move' | 'leave';
+
 /** Ephemeral collaboration presence broadcast. */
 export interface PresenceEnvelope {
   type: 'presence';
   pageId: UUID;
   userId: UUID;
+  /** Why this frame was emitted (absent = unspecified, treated as `move`). */
+  action?: PresenceAction;
   cursor?: CursorPosition;
   activeBlockId?: UUID;
   selectedRange?: SelectionRange;
