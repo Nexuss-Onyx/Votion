@@ -189,9 +189,13 @@ export function AppShell() {
 pnpm --filter @votion/search run build            # V-01  tsc emits dist/
 pnpm --filter @votion/search run test:transformer # V-02  54 tests
 pnpm --filter @votion/search run test:query       # V-03  50 tests
-pnpm turbo run typecheck                          # V-04  whole monorepo
+pnpm turbo run typecheck                          # V-04  whole monorepo (8 packages)
 pnpm --filter @votion/search run test             # all 224 tests
 ```
+
+Last verified on branch `arena/2bc8a1c2-votion` rebased onto `main` (`c3d76cb`,
+i.e. with `@votion/acl` present): every gate above exits `0`, `pnpm turbo run
+test` runs 285 tests across 4 packages, and `pnpm turbo run lint` passes 8/8.
 
 Each script first builds `@votion/types` (its `dist/` is what `@votion/search`
 compiles against), so the gates pass on a clean checkout without a prior
