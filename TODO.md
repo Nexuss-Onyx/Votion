@@ -12,7 +12,7 @@
 | :--- | :--- | :---: | :---: |
 | **Phase 0: Monorepo & Infrastructure** | `tooling/*`, `wasmer.toml` | ✅ Completed | 8 / 8 |
 | **Phase 1: Core Contracts & Database** | `@votion/types`, `@votion/db` | ✅ Completed | 12 / 12 |
-| **Phase 2: Client State & Offline Engine**| `@votion/sync-client` | ⬜ Not Started | 0 / 10 |
+| **Phase 2: Client State & Offline Engine**| `@votion/sync-client` | ✅ Completed | 10 / 10 |
 | **Phase 3: Block Editor & Canvas** | `@votion/editor` | ⬜ Not Started | 0 / 22 |
 | **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ⬜ Not Started | 0 / 20 |
 | **Phase 5: Backend API & Transactions** | `apps/server` | ⬜ Not Started | 0 / 14 |
@@ -77,27 +77,27 @@
 
 ## Phase 2: Client-Side State, Cache & Offline Engine (`@votion/sync-client`)
 
-- [ ] Set up normalized in-memory record store (Zustand):
-  - [ ] `Record<UUID, Block>`
-  - [ ] `Record<UUID, Collection>`
-  - [ ] `Record<UUID, CollectionView>`
-- [ ] Build IndexedDB persistent cache using Dexie.js:
-  - [ ] IndexedDB schema for `blocks`, `collections`, `views`, `outbox`.
-  - [ ] Hydrate in-memory Zustand store from IndexedDB on application launch.
-- [ ] Build `TransactionBuilder`:
-  - [ ] Helper methods to generate atomic `set`, `update`, `listAfter`, `listBefore`, `listRemove`.
-- [ ] Build `OptimisticPatcher`:
-  - [ ] Synchronously apply transactions to client Zustand memory before network confirmation.
-- [ ] Build persistent `OutboxStorage` queue:
-  - [ ] Queue unsent transactions during network offline events.
-  - [ ] Listen to browser `online` events and flush queued transactions in sequential batches.
-- [ ] Implement `SyncManager` & `Reconciler`:
-  - [ ] Batch outbound operations to `POST /api/v3/saveTransactions`.
-  - [ ] Apply inbound remote WebSocket record updates to Zustand and IndexedDB.
-  - [ ] Detect version conflicts and reconcile state.
-- [ ] Implement `PresenceClient`:
-  - [ ] Throttle and emit local mouse coordinates and active block ID.
-  - [ ] Store peer presence in ephemeral state.
+- [x] Set up normalized in-memory record store (Zustand):
+  - [x] `Record<UUID, Block>`
+  - [x] `Record<UUID, Collection>`
+  - [x] `Record<UUID, CollectionView>`
+- [x] Build IndexedDB persistent cache using Dexie.js:
+  - [x] IndexedDB schema for `blocks`, `collections`, `views`, `outbox`.
+  - [x] Hydrate in-memory Zustand store from IndexedDB on application launch.
+- [x] Build `TransactionBuilder`:
+  - [x] Helper methods to generate atomic `set`, `update`, `listAfter`, `listBefore`, `listRemove`.
+- [x] Build `OptimisticPatcher`:
+  - [x] Synchronously apply transactions to client Zustand memory before network confirmation.
+- [x] Build persistent `OutboxStorage` queue:
+  - [x] Queue unsent transactions during network offline events.
+  - [x] Listen to browser `online` events and flush queued transactions in sequential batches.
+- [x] Implement `SyncManager` & `Reconciler`:
+  - [x] Batch outbound operations to `POST /api/v3/saveTransactions`.
+  - [x] Apply inbound remote WebSocket record updates to Zustand and IndexedDB.
+  - [x] Detect version conflicts and reconcile state.
+- [x] Implement `PresenceClient`:
+  - [x] Throttle and emit local mouse coordinates and active block ID.
+  - [x] Store peer presence in ephemeral state.
 
 ---
 

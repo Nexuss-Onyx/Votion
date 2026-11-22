@@ -387,6 +387,35 @@ describe('transaction contracts', () => {
     ]);
   });
 
+  it('accepts primitive `set` payloads (booleans, numbers, strings)', () => {
+    // Regression: `SetOperation.args` is `unknown` and the wire protocol sends
+    // raw scalars (e.g. `set(['last_edited_time'], 1716300050000)`), so the guard
+    // must not require an object.
+    expect(setOperation(pointerFixture, ['alive'], false)).toSatisfy(isOperation);
+    expect(setOperation(pointerFixture, ['last_edited_time'], 1716300050000)).toSatisfy(
+      isOperation,
+    );
+    expect(setOperation(pointerFixture, ['properties', 'title'], [['Hi']])).toSatisfy(
+      isOperation,
+    );
+    expect(
+      isTransaction({
+        id: 'tx-scalars',
+        spaceId: SPACE_ID,
+        operations: [setOperation(pointerFixture, ['alive'], false)],
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects malformed operations per command', () => {
+    const base = { path: ['content'], pointer: pointerFixture };
+    expect(isOperation({ ...base, command: 'set' })).toBe(false); // args missing
+    expect(isOperation({ ...base, command: 'update', args: 'nope' })).toBe(false);
+    expect(isOperation({ ...base, command: 'listAfter', args: { after: null } })).toBe(false);
+    expect(isOperation({ ...base, command: 'listRemove', args: { id: 42 } })).toBe(false);
+    expect(isOperation({ ...base, command: 'nuke', args: {} })).toBe(false);
+  });
+
   it('validates transactions and derives touched pointers', () => {
     expect(isTransaction(transactionFixture)).toBe(true);
     expect(isTransaction({ id: 'tx' })).toBe(false);

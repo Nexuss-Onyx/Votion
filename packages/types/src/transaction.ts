@@ -193,7 +193,18 @@ const OPERATION_COMMANDS: ReadonlySet<string> = new Set<OperationCommand>([
   'keyedObjectSet',
 ]);
 
-/** Narrows an unknown value to a {@link Operation}. */
+/** Narrows an unknown value to a plain (non-array) object. */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Narrows an unknown value to a {@link Operation}.
+ *
+ * `args` is validated per command: `set` accepts any JSON value (including
+ * `false`, `0` and `''` — e.g. `set(['alive'], false)`), while the merge/list
+ * commands require a structured argument object.
+ */
 export function isOperation(value: unknown): value is Operation {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -214,12 +225,26 @@ export function isOperation(value: unknown): value is Operation {
     return false;
   }
   const pointer = candidate.pointer as { table?: unknown; id?: unknown };
-  return (
-    typeof pointer.table === 'string' &&
-    typeof pointer.id === 'string' &&
-    typeof candidate.args === 'object' &&
-    candidate.args !== null
-  );
+  if (typeof pointer.table !== 'string' || typeof pointer.id !== 'string') {
+    return false;
+  }
+  if (!('args' in candidate)) {
+    return false;
+  }
+  switch (candidate.command) {
+    case 'set':
+      // Any JSON value is a legal `set` payload.
+      return true;
+    case 'update':
+    case 'keyedObjectSet':
+      return isPlainObject(candidate.args);
+    case 'listAfter':
+    case 'listBefore':
+    case 'listRemove':
+      return isPlainObject(candidate.args) && typeof candidate.args.id === 'string';
+    default:
+      return false;
+  }
 }
 
 /** Narrows an unknown value to a {@link Transaction}. */
