@@ -31,7 +31,18 @@ function canManage(role: string | undefined): boolean {
 }
 
 export async function apiKeyRoutes(fastify: FastifyInstance): Promise<void> {
-  fastify.post('/api/api-keys', { preHandler: fastify.authenticate }, async (request, reply) => {
+  fastify.post(
+    '/api/api-keys',
+    {
+      preHandler: fastify.authenticate,
+      config: {
+        rateLimit: {
+          max: fastify.config.API_KEY_RATE_LIMIT_MAX,
+          timeWindow: fastify.config.RATE_LIMIT_WINDOW,
+        },
+      },
+    },
+    async (request, reply) => {
     const parsed = createSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.code(400).send({ error: 'Bad Request', issues: parsed.error.issues });
@@ -50,7 +61,8 @@ export async function apiKeyRoutes(fastify: FastifyInstance): Promise<void> {
       createdById: request.userId,
     });
     return reply.code(201).send({ record, token });
-  });
+    },
+  );
 
   fastify.get('/api/api-keys', { preHandler: fastify.authenticate }, async (request, reply) => {
     const workspaceId = (request.query as { workspaceId?: string }).workspaceId;

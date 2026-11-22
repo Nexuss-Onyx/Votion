@@ -22,7 +22,16 @@ import type {
   TextModifier,
   UUID,
 } from '@votion/types';
-import { isRichText, plainTextToRichText, richTextToPlainText } from '@votion/types';
+import {
+  isRichText,
+  plainTextToRichText,
+  richTextToPlainText,
+  sanitizeEmbedUrl,
+  sanitizeKatexExpression,
+  sanitizePlainText,
+  sanitizeRichText,
+  sanitizeUrl,
+} from '@votion/types';
 
 
 import type { BlockRecord, CollectionRecord } from '../../store/types.js';
@@ -230,9 +239,19 @@ export function toVotionRichText(value: unknown): RichText {
     }
     const link = record.text?.link?.url ?? (typeof record.href === 'string' ? record.href : null);
     if (link) modifiers.push(['a', link]);
+    if (
+      record.type === 'equation' &&
+      record['equation'] &&
+      typeof (record['equation'] as Record<string, unknown>)['expression'] === 'string'
+    ) {
+      modifiers.push([
+        'e',
+        (record['equation'] as Record<string, unknown>)['expression'] as string,
+      ]);
+    }
     result.push(modifiers.length > 0 ? [content, modifiers] : [content]);
   }
-  return result;
+  return sanitizeRichText(result);
 }
 
 // ---------------------------------------------------------------------------
@@ -256,6 +275,7 @@ const VOTION_TYPE_BY_NOTION: Record<string, BlockType> = {
   divider: 'divider',
   code: 'code',
   math: 'math',
+  equation: 'math',
   image: 'image',
   video: 'video',
   audio: 'audio',
@@ -962,9 +982,17 @@ export function notionBlockInputToVotion(
   if (type === 'page') {
     const title = payload['title'];
     properties['title'] =
-      typeof title === 'string' ? plainTextToRichText(title) : toVotionRichText(title);
+      typeof title === 'string'
+        ? plainTextToRichText(sanitizePlainText(title))
+        : toVotionRichText(title);
   } else if (type === 'divider') {
     /* no payload */
+  } else if (type === 'math') {
+    const rawExpression =
+      typeof payload['expression'] === 'string'
+        ? payload['expression']
+        : richTextToPlainText(toVotionRichText(payload['rich_text'] ?? payload['title']));
+    properties['title'] = [[sanitizeKatexExpression(rawExpression)]];
   } else if (type === 'to_do') {
     properties['title'] = toVotionRichText(payload['rich_text']);
     properties['checked'] = [[payload['checked'] === true ? 'yes' : 'no']];
@@ -973,11 +1001,16 @@ export function notionBlockInputToVotion(
     properties['language'] = [[typeof payload['language'] === 'string' ? payload['language'] : 'plain text']];
     if (payload['caption']) properties['caption'] = toVotionRichText(payload['caption']);
   } else if (MEDIA_TYPES.has(type)) {
-    const url = mediaUrl(payload);
-    properties['source'] = [[url]];
+    const rawUrl = mediaUrl(payload);
+    const safeUrl =
+      type === 'embed'
+        ? (sanitizeEmbedUrl(rawUrl) ?? '')
+        : (sanitizeUrl(rawUrl, { allowRelative: true, allowMailto: false }) ?? '');
+    properties['source'] = [[safeUrl]];
     if (payload['caption']) properties['caption'] = toVotionRichText(payload['caption']);
   } else if (type === 'bookmark') {
-    properties['source'] = [[typeof payload['url'] === 'string' ? payload['url'] : mediaUrl(payload)]];
+    const rawUrl = typeof payload['url'] === 'string' ? payload['url'] : mediaUrl(payload);
+    properties['source'] = [[sanitizeUrl(rawUrl, { allowRelative: false, allowMailto: false }) ?? '']];
   } else if (type === 'synced_block') {
     const syncedFrom = payload['synced_from'];
     if (syncedFrom && typeof syncedFrom === 'object') {

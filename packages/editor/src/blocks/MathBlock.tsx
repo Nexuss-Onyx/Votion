@@ -1,8 +1,12 @@
 import { useCallback, useState } from 'react';
-import katex from 'katex';
-import type { Block, UUID } from '@votion/types';
-import { richTextToPlainText } from '@votion/types';
+import {
+  type Block,
+  type UUID,
+  richTextToPlainText,
+  sanitizeKatexExpression,
+} from '@votion/types';
 import type { BlockEditorActions } from '../lib/editor.js';
+import { renderSafeKatex } from '../lib/sanitize.js';
 
 export interface MathBlockProps {
   block: Block;
@@ -12,8 +16,9 @@ export interface MathBlockProps {
 }
 
 /**
- * Math block: block-level KaTeX equation. Double-click to edit the LaTeX
- * source in a textarea; the result is stored in `properties.title`.
+ * Math block: block-level KaTeX equation with strict XSS sanitization.
+ * Double-click to edit the LaTeX source in a textarea; the sanitized result is
+ * stored in `properties.title`.
  */
 export function MathBlock({
   block,
@@ -24,7 +29,9 @@ export function MathBlock({
   const latex = richTextToPlainText(block.properties.title);
 
   const handleSave = useCallback(() => {
-    editor.patchBlock(block.id, { properties: { title: [[draft]] } });
+    const safeDraft = sanitizeKatexExpression(draft);
+    editor.patchBlock(block.id, { properties: { title: [[safeDraft]] } });
+    setDraft(safeDraft);
     setEditing(false);
   }, [block.id, draft, editor]);
 
@@ -66,10 +73,7 @@ export function MathBlock({
     >
       <div
         dangerouslySetInnerHTML={{
-          __html: katex.renderToString(latex, {
-            throwOnError: false,
-            displayMode: true,
-          }),
+          __html: renderSafeKatex(latex, true),
         }}
       />
     </div>

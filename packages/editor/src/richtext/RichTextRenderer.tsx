@@ -1,12 +1,14 @@
-import type {
-  BackgroundColor,
-  HighlightColor,
-  RichText,
-  RichTextSegment,
-  TextColor,
+import {
+  type BackgroundColor,
+  type HighlightColor,
+  type RichText,
+  type RichTextSegment,
+  type TextColor,
+  sanitizeRichTextSegment,
+  sanitizeUrl,
 } from '@votion/types';
-import katex from 'katex';
 import { clsx } from 'clsx';
+import { renderSafeKatex } from '../lib/sanitize.js';
 
 const TEXT_COLOR_CLASSES: Record<TextColor, string> = {
   default: 'color-default',
@@ -39,11 +41,12 @@ export interface RichTextRendererProps {
   className?: string;
 }
 
-/** Renders a single `[text, modifiers]` rich text segment. */
+/** Renders a single sanitized `[text, modifiers]` rich text segment. */
 export function renderRichTextSegment(
-  segment: RichTextSegment,
+  rawSegment: RichTextSegment,
   index: number,
 ): JSX.Element {
+  const segment = sanitizeRichTextSegment(rawSegment);
   const [content, modifiers = []] = segment;
   const classes: string[] = [];
   let link: string | undefined;
@@ -77,9 +80,16 @@ export function renderRichTextSegment(
         );
         break;
       }
-      case 'a':
-        link = argument as string;
+      case 'a': {
+        const safeHref = sanitizeUrl(argument as string, {
+          allowRelative: true,
+          allowMailto: true,
+        });
+        if (safeHref) {
+          link = safeHref;
+        }
         break;
+      }
       case 'e':
         equation = argument as string;
         break;
@@ -111,24 +121,31 @@ export function renderRichTextSegment(
   );
 
   if (equation) {
+    const equationNode = (
+      <span
+        className="inline-equation"
+        dangerouslySetInnerHTML={{
+          __html: renderSafeKatex(equation, false),
+        }}
+      />
+    );
+    if (link) {
+      return (
+        <a
+          className={segmentClasses}
+          key={`segment-${index}`}
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {equationNode}
+        </a>
+      );
+    }
     return (
-      <a
-        className={segmentClasses}
-        key={`segment-${index}`}
-        href={link ?? undefined}
-        target={link ? '_blank' : undefined}
-        rel={link ? 'noopener noreferrer' : undefined}
-      >
-        <span
-          className="inline-equation"
-          dangerouslySetInnerHTML={{
-            __html: katex.renderToString(equation, {
-              throwOnError: false,
-              displayMode: false,
-            }),
-          }}
-        />
-      </a>
+      <span className={segmentClasses} key={`segment-${index}`}>
+        {equationNode}
+      </span>
     );
   }
 
@@ -151,7 +168,7 @@ export function renderRichTextSegment(
 /**
  * Renders a `[string, TextModifier[]][]` rich text value into inline DOM
  * nodes supporting bold, italic, strikethrough, underline, code, color /
- * highlight, links, inline equations and mentions.
+ * highlight, sanitized links, sanitized inline equations and mentions.
  */
 export function RichTextRenderer({
   richText,

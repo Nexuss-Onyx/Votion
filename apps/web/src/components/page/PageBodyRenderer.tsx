@@ -2,7 +2,15 @@
 
 import type { MouseEvent, ReactNode } from 'react';
 import { getRecordStore, useRecordStore } from '@votion/sync-client';
-import type { Block, RichText, RichTextSegment, TextModifier, UUID } from '@votion/types';
+import {
+  type Block,
+  type RichText,
+  type RichTextSegment,
+  type TextModifier,
+  type UUID,
+  sanitizeRichTextSegment,
+  sanitizeUrl,
+} from '@votion/types';
 import { ChevronRight } from 'lucide-react';
 
 import { useWorkspace } from '@/state/WorkspaceProvider';
@@ -51,9 +59,14 @@ function renderModifierText(text: string, modifiers: TextModifier[] = []): React
       case 'c':
         code = true;
         break;
-      case 'a':
-        link = typeof argument === 'string' ? argument : undefined;
+      case 'a': {
+        const safeHref =
+          typeof argument === 'string'
+            ? sanitizeUrl(argument, { allowRelative: true, allowMailto: true })
+            : null;
+        link = safeHref ?? undefined;
         break;
+      }
       default:
         break;
     }
@@ -66,14 +79,25 @@ function renderModifierText(text: string, modifiers: TextModifier[] = []): React
   if (italic) node = <em>{node}</em>;
   if (strike) node = <s>{node}</s>;
   if (underline) node = <u>{node}</u>;
-  if (link) node = <a href={link} className="text-notion-accent underline">{node}</a>;
+  if (link) {
+    node = (
+      <a
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-notion-accent underline"
+      >
+        {node}
+      </a>
+    );
+  }
 
   return node;
 }
 
 /** Renders one rich text segment, wrapping comment anchors in <mark>. */
 function renderSegment(
-  segment: RichTextSegment,
+  rawSegment: RichTextSegment,
   index: number,
   opts: {
     blockId: string;
@@ -81,6 +105,7 @@ function renderSegment(
     onHighlightClick: PageBodyRendererProps['onHighlightClick'];
   },
 ): ReactNode {
+  const segment = sanitizeRichTextSegment(rawSegment);
   const [text, modifiers = []] = segment;
   const highlighted = modifiers.some(([tag]) => tag === 'h');
 

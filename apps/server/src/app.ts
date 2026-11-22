@@ -8,8 +8,12 @@ import rateLimit from '@fastify/rate-limit';
 
 import { loadConfig, type ServerConfig } from './config.js';
 import authPlugin from './plugins/auth.js';
-import { createPublisher, type EventPublisher } from './lib/redis.js';
+import { createPublisher, hashToken, type EventPublisher } from './lib/redis.js';
 import { createUploadSigner, type UploadSigner } from './lib/s3.js';
+import {
+  buildHelmetCspDirectives,
+  createCorsOriginHandler,
+} from './lib/security.js';
 import { apiKeyRoutes } from './routes/apiKeys.js';
 import { assetRoutes } from './routes/assets.js';
 import { authRoutes } from './routes/auth.js';
@@ -68,15 +72,38 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Fas
   );
 
   await fastify.register(cors, {
-    origin: config.CORS_ORIGIN === '*' ? true : config.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
+    origin: createCorsOriginHandler(config),
     credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Authorization',
+      'Content-Type',
+      'Notion-Version',
+      'X-Request-Id',
+    ],
+    maxAge: 600,
   });
-  await fastify.register(helmet, { contentSecurityPolicy: false });
+  await fastify.register(helmet, {
+    contentSecurityPolicy: {
+      directives: buildHelmetCspDirectives(config),
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    frameguard: { action: 'sameorigin' },
+  });
   await fastify.register(compress);
   await fastify.register(rateLimit, {
-    max: 120,
-    timeWindow: '1 minute',
-    keyGenerator: (request) => request.userId ?? request.ip,
+    max: config.RATE_LIMIT_MAX,
+    timeWindow: config.RATE_LIMIT_WINDOW,
+    keyGenerator: (request) => {
+      if (request.userId) {
+        return `user:${request.userId}`;
+      }
+      const authHeader = request.headers.authorization;
+      if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+        return `token:${hashToken(authHeader.slice(7).trim())}`;
+      }
+      return `ip:${request.ip}`;
+    },
   });
   await fastify.register(authPlugin);
   await fastify.register(authRoutes);

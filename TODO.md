@@ -22,7 +22,7 @@
 | **Phase 9: Background Worker Fleet** | `apps/task-worker` | ✅ Completed | 11 / 11 |
 | **Phase 10: Web Application Shell** | `apps/web` | ✅ Completed | 16 / 16 |
 | **Phase 11: Developer API & Webhooks** | `apps/server/v1` | ✅ Completed | 8 / 8 |
-| **Phase 12: Wasmer Edge Deployment** | `wasmer.toml`, Wasmer CLI | ⬜ Not Started | 0 / 8 |
+| **Phase 12: Wasmer Edge Deployment** | `wasmer.toml`, Wasmer CLI | ✅ Completed | 8 / 8 |
 
 ---
 
@@ -359,16 +359,16 @@
 
 ## Phase 12: Wasmer Edge Deployment Pipeline & Production Release
 
-- [ ] Configure `wasmer.toml` package manifest, capabilities, and HTTP service bindings.
-- [ ] Configure deployment authentication token (`WASMER_TOKEN` via environment variable or secret).
-- [ ] Implement and test zero-Docker remote build and deployment command:
-  - [ ] `export WASMER_TOKEN="<YOUR_WASMER_TOKEN>" && ~/.wasmer/bin/wasmer deploy --build-remote`
-- [ ] Configure Wasmer Edge environment secrets (`DATABASE_URL`, `REDIS_URL`, `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`).
-- [ ] Set up GitHub Actions CI/CD workflows:
-  - [ ] Automated linting, typechecking, and unit tests on pull requests.
-  - [ ] Automated Wasmer Edge deployment on push to `main` using `WASMER_TOKEN`.
-- [ ] Perform edge security hardening:
-  - [ ] Rate limiting on API routes.
-  - [ ] Strict CORS policies and CSP headers for sandboxed iframes.
-  - [ ] Input sanitization on Rich Text and KaTeX expressions.
-- [ ] Write user and developer documentation (`README.md`, `CONTRIBUTING.md`, Wasmer Deployment Guide).
+- [x] Configure `wasmer.toml` package manifest, capabilities, and HTTP service bindings.
+- [x] Configure deployment authentication token (`WASMER_TOKEN` via environment variable or secret).
+- [x] Implement and test zero-Docker remote build and deployment command:
+  - [x] `export WASMER_TOKEN="<YOUR_WASMER_TOKEN>" && ~/.wasmer/bin/wasmer deploy --build-remote`
+- [x] Configure Wasmer Edge environment secrets (`DATABASE_URL`, `REDIS_URL`, `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`).
+- [x] Set up GitHub Actions CI/CD workflows:
+  - [x] Automated linting, typechecking, and unit tests on pull requests.
+  - [x] Automated Wasmer Edge deployment on push to `main` using `WASMER_TOKEN`.
+- [x] Perform edge security hardening:
+  - [x] Rate limiting on API routes.
+  - [x] Strict CORS policies and CSP headers for sandboxed iframes.
+  - [x] Input sanitization on Rich Text and KaTeX expressions.
+- [x] Write user and developer documentation (`README.md`, `CONTRIBUTING.md`, Wasmer Deployment Guide).

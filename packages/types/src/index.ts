@@ -16,3 +16,4 @@ export * from './collection-view.js';
 export * from './transaction.js';
 export * from './websocket.js';
 export * from './permissions.js';
+export * from './security.js';

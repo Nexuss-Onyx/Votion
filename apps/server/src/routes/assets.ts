@@ -8,7 +8,15 @@ import { getUploadFileUrlSchema } from '../schemas.js';
 export async function assetRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.post(
     '/api/v3/getUploadFileUrl',
-    { preHandler: fastify.authenticate },
+    {
+      preHandler: fastify.authenticate,
+      config: {
+        rateLimit: {
+          max: fastify.config.UPLOAD_RATE_LIMIT_MAX,
+          timeWindow: fastify.config.RATE_LIMIT_WINDOW,
+        },
+      },
+    },
     async (request, reply) => {
       const parsed = getUploadFileUrlSchema.safeParse(request.body);
       if (!parsed.success) {

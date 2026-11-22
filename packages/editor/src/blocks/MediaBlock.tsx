@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Block, RichText, UUID } from '@votion/types';
+import {
+  type Block,
+  type RichText,
+  type UUID,
+  sanitizeEmbedUrl,
+  sanitizeUrl,
+} from '@votion/types';
 import { RichTextRenderer } from '../richtext/RichTextRenderer.js';
 import type { BlockEditorActions } from '../lib/editor.js';
 import { BookmarkBlock } from './BookmarkBlock.js';
@@ -25,6 +31,13 @@ function sourceOf(block: Block): string {
   return source[0];
 }
 
+function safeMediaUrl(block: Block): string | null {
+  return sanitizeUrl(sourceOf(block), {
+    allowRelative: true,
+    allowMailto: false,
+  });
+}
+
 /** Image block with width resize handles, stored in `format.block_width`. */
 function ImageMedia({
   block,
@@ -33,7 +46,7 @@ function ImageMedia({
   block: Block;
   editor: BlockEditorActions;
 }) {
-  const url = sourceOf(block);
+  const url = safeMediaUrl(block);
   const [width, setWidth] = useState(() => {
     const stored = (block.format.block_width as number | undefined) ?? 100;
     return Math.max(20, Math.min(200, stored));
@@ -79,6 +92,14 @@ function ImageMedia({
 
   const caption: RichText = block.properties.caption ?? [];
 
+  if (!url) {
+    return (
+      <div className="media-block my-2 rounded border border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
+        Invalid or blocked image source URL.
+      </div>
+    );
+  }
+
   return (
     <figure className="media-block my-2 text-center relative" style={{ width: `${width}%` }}>
       <img
@@ -102,7 +123,14 @@ function ImageMedia({
 
 /** Video block with native player controls. */
 function VideoMedia({ block }: { block: Block }) {
-  const url = sourceOf(block);
+  const url = safeMediaUrl(block);
+  if (!url) {
+    return (
+      <div className="media-block my-2 rounded border border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
+        Invalid or blocked video source URL.
+      </div>
+    );
+  }
   return (
     <div className="media-block my-2">
       <video src={url} controls className="rounded border border-gray-100 w-full" />
@@ -112,7 +140,14 @@ function VideoMedia({ block }: { block: Block }) {
 
 /** Audio block with native player controls. */
 function AudioMedia({ block }: { block: Block }) {
-  const url = sourceOf(block);
+  const url = safeMediaUrl(block);
+  if (!url) {
+    return (
+      <div className="media-block my-2 rounded border border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
+        Invalid or blocked audio source URL.
+      </div>
+    );
+  }
   return (
     <div className="media-block my-2">
       <audio src={url} controls className="w-full" />
@@ -120,9 +155,16 @@ function AudioMedia({ block }: { block: Block }) {
   );
 }
 
-/** File attachment block with a download link. */
+/** File attachment block with a sanitized download link. */
 function FileMedia({ block }: { block: Block }) {
-  const url = sourceOf(block);
+  const url = safeMediaUrl(block);
+  if (!url) {
+    return (
+      <div className="media-block my-2 rounded border border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
+        Invalid or blocked attachment URL.
+      </div>
+    );
+  }
   return (
     <div className="media-block my-2 flex items-center gap-2 rounded border border-gray-200 bg-gray-50 p-3">
       <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
@@ -132,16 +174,32 @@ function FileMedia({ block }: { block: Block }) {
   );
 }
 
-/** Sandboxed embed block (YouTube, Figma, GitHub Gist, CodePen, …). */
+/**
+ * Sandboxed embed block restricted strictly to trusted HTTPS providers
+ * (YouTube, Figma, GitHub, CodePen).
+ */
 function EmbedMedia({ block }: { block: Block }) {
-  const url = sourceOf(block);
+  const safeUrl = sanitizeEmbedUrl(sourceOf(block));
+  if (!safeUrl) {
+    return (
+      <div
+        data-testid="blocked-embed"
+        role="alert"
+        className="media-block my-2 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+      >
+        Embed blocked: only HTTPS URLs from trusted providers (YouTube, Figma, GitHub, CodePen) are permitted.
+      </div>
+    );
+  }
   return (
     <div className="media-block my-2 aspect-video rounded border border-gray-200 overflow-hidden">
       <iframe
-        src={url}
+        src={safeUrl}
         title="Embed"
         className="w-full h-full"
-        sandbox="allow-same-origin allow-scripts allow-popups"
+        sandbox="allow-scripts allow-same-origin allow-popups"
+        referrerPolicy="no-referrer"
+        loading="lazy"
       />
     </div>
   );

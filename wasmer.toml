@@ -1,9 +1,24 @@
+# =============================================================================
+# Votion — Wasmer Edge Package Manifest (Zero-Docker Remote Build)
+# Deploy with: export WASMER_TOKEN="<YOUR_WASMER_TOKEN>" && ~/.wasmer/bin/wasmer deploy --build-remote
+# =============================================================================
+
 [package]
 name = "votion/votion-app"
 version = "0.1.0"
 description = "Votion: Open-Source End-to-End Notion on Wasmer Edge"
 license = "MIT"
 authors = ["Nexuss-Onyx <tadd4212@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/Nexuss-Onyx/Votion"
+repository = "https://github.com/Nexuss-Onyx/Votion"
+
+[fs]
+"/app" = "."
+
+[capabilities]
+networking = true
+http_client = { allow_all_hosts = true }
 
 [[services]]
 name = "web"
@@ -13,8 +28,34 @@ runner = "https://webc.org/runner/node"
 [services.annotations]
 routes = ["/*"]
 
+[services.annotations.http]
+port = 3000
+healthcheck_path = "/health"
+
+[[services]]
+name = "api"
+kind = "http"
+runner = "https://webc.org/runner/node"
+
+[services.annotations]
+routes = ["/api/*", "/v1/*", "/health"]
+
+[services.annotations.http]
+port = 3001
+healthcheck_path = "/health"
+
 [env]
+NODE_ENV = "production"
+HOST = "0.0.0.0"
+VOTION_DB_DRIVER = "neon-websocket"
+S3_BUCKET = "votion-media"
+S3_BUCKET_NAME = "votion-media"
 DATABASE_URL = { secret = "DATABASE_URL" }
 REDIS_URL = { secret = "REDIS_URL" }
 S3_ENDPOINT = { secret = "S3_ENDPOINT" }
-S3_BUCKET = "votion-media"
+S3_ACCESS_KEY = { secret = "S3_ACCESS_KEY" }
+S3_SECRET_KEY = { secret = "S3_SECRET_KEY" }
+JWT_SECRET = { secret = "JWT_SECRET" }
+WS_JWT_SECRET = { secret = "WS_JWT_SECRET" }
+MEILISEARCH_HOST = { secret = "MEILISEARCH_HOST" }
+MEILISEARCH_API_KEY = { secret = "MEILISEARCH_API_KEY" }

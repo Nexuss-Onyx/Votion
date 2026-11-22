@@ -12,6 +12,7 @@
 import { randomBytes } from 'node:crypto';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { sanitizePlainText } from '@votion/types';
 
 import { hashToken } from '../lib/redis.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
@@ -49,46 +50,70 @@ async function issueTokens(
 }
 
 export async function authRoutes(fastify: FastifyInstance): Promise<void> {
-  fastify.post('/api/auth/register', async (request, reply) => {
-    const parsed = registerSchema.safeParse(request.body);
-    if (!parsed.success) {
-      return reply.code(400).send({ error: 'Bad Request', issues: parsed.error.issues });
-    }
-    const { email, password, fullName, workspaceName } = parsed.data;
-    const existing = await fastify.store.findUserByEmail(email);
-    if (existing) {
-      return reply.code(409).send({ error: 'Conflict', message: 'Email already registered.' });
-    }
-    const passwordHash = await hashPassword(password);
-    const user = await fastify.store.createUser({ email, passwordHash, fullName });
-    const workspace = await fastify.store.createWorkspace({
-      name: workspaceName ?? `${fullName}'s Workspace`,
-    });
-    await fastify.store.addMember(workspace.id, user.id, 'owner');
-    const tokens = await issueTokens(fastify, user);
-    return reply.code(201).send({
-      user: publicUser(user),
-      workspace: { id: workspace.id, name: workspace.name },
-      ...tokens,
-    });
-  });
+  const authRateLimit = {
+    max: fastify.config.AUTH_RATE_LIMIT_MAX,
+    timeWindow: fastify.config.RATE_LIMIT_WINDOW,
+    keyGenerator: (request: FastifyRequest) => `auth:${request.ip}`,
+  };
 
-  fastify.post('/api/auth/login', async (request, reply) => {
-    const parsed = loginSchema.safeParse(request.body);
-    if (!parsed.success) {
-      return reply.code(400).send({ error: 'Bad Request', issues: parsed.error.issues });
-    }
-    const user = await fastify.store.findUserByEmail(parsed.data.email);
-    const ok = user ? await verifyPassword(user.passwordHash, parsed.data.password) : false;
-    if (!user || !ok) {
-      return reply.code(401).send({ error: 'Unauthorized', message: 'Invalid email or password.' });
-    }
-    await fastify.store.touchUserLastActive(user.id);
-    const tokens = await issueTokens(fastify, user);
-    return reply.send({ user: publicUser(user), ...tokens });
-  });
+  fastify.post(
+    '/api/auth/register',
+    { config: { rateLimit: authRateLimit } },
+    async (request, reply) => {
+      const parsed = registerSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.code(400).send({ error: 'Bad Request', issues: parsed.error.issues });
+      }
+      const { email, password } = parsed.data;
+      const fullName = sanitizePlainText(parsed.data.fullName, { maxLength: 255 }).trim();
+      const workspaceName = parsed.data.workspaceName
+        ? sanitizePlainText(parsed.data.workspaceName, { maxLength: 255 }).trim()
+        : undefined;
+      if (!fullName) {
+        return reply.code(400).send({ error: 'Bad Request', message: 'Valid fullName is required.' });
+      }
+      const existing = await fastify.store.findUserByEmail(email);
+      if (existing) {
+        return reply.code(409).send({ error: 'Conflict', message: 'Email already registered.' });
+      }
+      const passwordHash = await hashPassword(password);
+      const user = await fastify.store.createUser({ email, passwordHash, fullName });
+      const workspace = await fastify.store.createWorkspace({
+        name: workspaceName && workspaceName.length > 0 ? workspaceName : `${fullName}'s Workspace`,
+      });
+      await fastify.store.addMember(workspace.id, user.id, 'owner');
+      const tokens = await issueTokens(fastify, user);
+      return reply.code(201).send({
+        user: publicUser(user),
+        workspace: { id: workspace.id, name: workspace.name },
+        ...tokens,
+      });
+    },
+  );
 
-  fastify.post('/api/auth/refresh', async (request, reply) => {
+  fastify.post(
+    '/api/auth/login',
+    { config: { rateLimit: authRateLimit } },
+    async (request, reply) => {
+      const parsed = loginSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.code(400).send({ error: 'Bad Request', issues: parsed.error.issues });
+      }
+      const user = await fastify.store.findUserByEmail(parsed.data.email);
+      const ok = user ? await verifyPassword(user.passwordHash, parsed.data.password) : false;
+      if (!user || !ok) {
+        return reply.code(401).send({ error: 'Unauthorized', message: 'Invalid email or password.' });
+      }
+      await fastify.store.touchUserLastActive(user.id);
+      const tokens = await issueTokens(fastify, user);
+      return reply.send({ user: publicUser(user), ...tokens });
+    },
+  );
+
+  fastify.post(
+    '/api/auth/refresh',
+    { config: { rateLimit: authRateLimit } },
+    async (request, reply) => {
     const parsed = refreshSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.code(400).send({ error: 'Bad Request', issues: parsed.error.issues });
@@ -108,7 +133,8 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
     }
     const tokens = await issueTokens(fastify, user);
     return reply.send({ user: publicUser(user), ...tokens });
-  });
+    },
+  );
 
   fastify.post('/api/auth/logout', async (request, reply) => {
     const parsed = logoutSchema.safeParse(request.body);

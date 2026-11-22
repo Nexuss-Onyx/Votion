@@ -21,17 +21,35 @@ const envSchema = z.object({
   VOTION_DB_DRIVER: z.enum(['neon-http', 'neon-websocket', 'node-postgres']).optional(),
   REDIS_URL: z.string().optional(),
   S3_ENDPOINT: z.string().url().optional(),
+  S3_ACCESS_KEY: z.string().optional(),
+  S3_SECRET_KEY: z.string().optional(),
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
-  S3_BUCKET_NAME: z.string().default('votion-media'),
+  S3_BUCKET: z.string().optional(),
+  S3_BUCKET_NAME: z.string().optional(),
   S3_PUBLIC_DOMAIN: z.string().url().optional(),
   S3_REGION: z.string().default('auto'),
   /** Maximum accepted upload size (bytes). Default 100 MiB. */
   MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(100 * 1024 * 1024),
-  CORS_ORIGIN: z.string().default('*'),
+  /** Comma-separated allowed browser origins (supports `https://*.wasmer.app`). */
+  CORS_ORIGIN: z.string().default(''),
+  /** Baseline API rate limit (requests per window). */
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
+  /** Strict rate limit for sensitive authentication endpoints (`/api/auth/*`). */
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(15),
+  /** Rate limit for state-mutating transaction endpoints (`/api/v3/saveTransactions`). */
+  WRITE_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(60),
+  /** Rate limit for presigned media upload endpoints (`/api/v3/getUploadFileUrl`). */
+  UPLOAD_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(30),
+  /** Rate limit for API key and webhook provisioning endpoints. */
+  API_KEY_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
+  /** Sliding window duration for rate limiters. */
+  RATE_LIMIT_WINDOW: z.string().default('1 minute'),
 });
 
-export type ServerConfig = z.infer<typeof envSchema>;
+export type ServerConfig = Omit<z.infer<typeof envSchema>, 'S3_BUCKET_NAME'> & {
+  S3_BUCKET_NAME: string;
+};
 
 const TEST_JWT_SECRET = 'votion-test-jwt-secret-not-for-production';
 
@@ -46,14 +64,20 @@ export function loadConfig(
       .join('\n');
     throw new Error(`Invalid server configuration:\n${issues}`);
   }
-  const config = parsed.data;
-  if (!config.JWT_SECRET) {
-    if (config.NODE_ENV === 'production') {
+  const raw = parsed.data;
+  const normalized: ServerConfig = {
+    ...raw,
+    S3_ACCESS_KEY_ID: raw.S3_ACCESS_KEY_ID ?? raw.S3_ACCESS_KEY,
+    S3_SECRET_ACCESS_KEY: raw.S3_SECRET_ACCESS_KEY ?? raw.S3_SECRET_KEY,
+    S3_BUCKET_NAME: raw.S3_BUCKET_NAME ?? raw.S3_BUCKET ?? 'votion-media',
+  };
+  if (!normalized.JWT_SECRET) {
+    if (normalized.NODE_ENV === 'production') {
       throw new Error('JWT_SECRET is required in production (min 16 characters).');
     }
-    return { ...config, JWT_SECRET: TEST_JWT_SECRET };
+    return { ...normalized, JWT_SECRET: TEST_JWT_SECRET };
   }
-  return config;
+  return normalized;
 }
 
 /** Whether a real PostgreSQL connection string is configured. */

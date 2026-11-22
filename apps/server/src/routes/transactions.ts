@@ -5,12 +5,21 @@ import type { RecordUpdatedEnvelope, Transaction } from '@votion/types';
 
 import { OperationError } from '../lib/jsonpatch.js';
 import { spaceEventsChannel } from '../lib/redis.js';
+import { sanitizeTransactions } from '../lib/security.js';
 import { saveTransactionsSchema } from '../schemas.js';
 
 export async function transactionRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.post(
     '/api/v3/saveTransactions',
-    { preHandler: fastify.authenticate },
+    {
+      preHandler: fastify.authenticate,
+      config: {
+        rateLimit: {
+          max: fastify.config.WRITE_RATE_LIMIT_MAX,
+          timeWindow: fastify.config.RATE_LIMIT_WINDOW,
+        },
+      },
+    },
     async (request, reply) => {
       const parsed = saveTransactionsSchema.safeParse(request.body);
       if (!parsed.success) {
@@ -43,8 +52,12 @@ export async function transactionRoutes(fastify: FastifyInstance): Promise<void>
       }
 
       try {
-        const applied = await fastify.store.applyTransactions(
+        const sanitizedTransactions = await sanitizeTransactions(
           transactions,
+          fastify.store,
+        );
+        const applied = await fastify.store.applyTransactions(
+          sanitizedTransactions,
           requestId,
           request.userId,
         );

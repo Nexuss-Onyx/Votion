@@ -1,0 +1,55 @@
+name: Deploy to Wasmer Edge
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wasmer-edge-production-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Remote Build & Deploy to Wasmer Edge
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build production artifacts
+        run: pnpm turbo run build
+
+      - name: Install Wasmer CLI
+        run: |
+          curl https://get.wasmer.io -sSfL | sh
+          echo "${HOME}/.wasmer/bin" >> "${GITHUB_PATH}"
+          "${HOME}/.wasmer/bin/wasmer" --version
+
+      - name: Deploy application to Wasmer Edge (remote build, zero-Docker)
+        env:
+          WASMER_TOKEN: ${{ secrets.WASMER_TOKEN }}
+        run: |
+          if [ -z "${WASMER_TOKEN:-}" ]; then
+            echo "::error::WASMER_TOKEN repository secret is not configured."
+            exit 1
+          fi
+          wasmer deploy --build-remote --non-interactive --token="${WASMER_TOKEN}"

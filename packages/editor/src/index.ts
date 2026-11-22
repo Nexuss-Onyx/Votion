@@ -28,6 +28,7 @@ export {
 } from './lib/editor.js';
 export { useBlock, useChildBlocks, useBlockStore, installTestStore, uninstallTestStore } from './lib/store.js';
 export { RichTextRenderer } from './richtext/RichTextRenderer.js';
+export { renderSafeKatex } from './lib/sanitize.js';
 export { FloatingToolbar } from './richtext/FloatingToolbar.js';
 export { SlashMenu } from './shortcuts/SlashMenu.js';
 export { BookmarkBlock } from './blocks/BookmarkBlock.js';
