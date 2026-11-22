@@ -1,0 +1,71 @@
+{
+  "name": "@votion/search",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Votion Meilisearch integration, document transformer, Quick Find query builder & Cmd+K modal",
+  "author": "Nexuss-Onyx <tadd4212@gmail.com>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./indexer": {
+      "types": "./dist/indexer/index.d.ts",
+      "default": "./dist/indexer/index.js"
+    },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "default": "./dist/query/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "default": "./dist/components/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.test.json --noEmit && vitest run",
+    "test:watch": "vitest",
+    "test:transformer": "vitest run test/transformer.test.ts",
+    "test:query": "vitest run test/query.test.ts",
+    "test:client": "vitest run test/client.test.ts",
+    "test:components": "vitest run test/components.test.ts test/highlight.test.ts test/recent-pages.test.ts",
+    "provision": "tsc -p tsconfig.json && node dist/scripts/provision.js",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@votion/types": "workspace:*",
+    "lucide-react": "^1.77.0",
+    "meilisearch": "^0.63.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@votion/eslint-config": "workspace:*",
+    "@votion/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
+  }
+}

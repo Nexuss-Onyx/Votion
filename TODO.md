@@ -18,7 +18,7 @@
 | **Phase 5: Backend API & Transactions** | `apps/server` | ⬜ Not Started | 0 / 14 |
 | **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ✅ Completed | 9 / 9 |
 | **Phase 7: Access Control & Permissions** | `@votion/acl` | ✅ Completed | 8 / 8 |
-| **Phase 8: Search & Discovery Engine** | `@votion/search` | ⬜ Not Started | 0 / 7 |
+| **Phase 8: Search & Discovery Engine** | `@votion/search` | ✅ Completed | 7 / 7 |
 | **Phase 9: Background Worker Fleet** | `apps/task-worker` | ⬜ Not Started | 0 / 11 |
 | **Phase 10: Web Application Shell** | `apps/web` | ⬜ Not Started | 0 / 16 |
 | **Phase 11: Developer API & Webhooks** | `apps/server/v1` | ⬜ Not Started | 0 / 8 |
@@ -270,15 +270,23 @@
 
 ## Phase 8: Search & Discovery Engine (`@votion/search`)
 
-- [ ] Set up Meilisearch index schemas for `blocks` and `pages`.
-- [ ] Build `DocumentTransformer` to strip rich-text markup and produce searchable plain-text tokens.
-- [ ] Build `QuickFindQueryBuilder`:
-  - [ ] Prefix matching and typo-tolerant search.
-  - [ ] Scoped search filters (by workspace, creator, date, page sub-tree).
-- [ ] Build `Cmd+K` Quick Find frontend modal:
-  - [ ] Instant search-as-you-type results.
-  - [ ] Highlight matched query text in previews.
-  - [ ] Recent pages history list.
+- [x] Set up Meilisearch index schemas for `blocks` and `pages`.
+  - `votion_blocks` index: searchable `title`/`plain_text`; filterable `space_id`, `parent_id`,
+    `root_page_id`, `ancestor_ids`, `access_principals`, `created_by`, `last_edited_time`, `type`,
+    `alive`; ranking `words → typo → proximity → attribute → sort → exactness`; prefix search at
+    indexing time; idempotent provisioning (`pnpm --filter @votion/search run provision`).
+- [x] Build `DocumentTransformer` to strip rich-text markup and produce searchable plain-text tokens.
+  - Rejoins mid-word styling splits, drops modifier tuples/URLs/UUID mentions, renders date mentions
+    and inline equations, and walks page trees (breadcrumbs + `ancestor_ids` + `root_page_id`).
+- [x] Build `QuickFindQueryBuilder`:
+  - [x] Prefix matching and typo-tolerant search.
+  - [x] Scoped search filters (by workspace, creator, date, page sub-tree).
+  - ACL scoping is fail-closed: empty scope ⇒ no request; every filter value is escaped.
+- [x] Build `Cmd+K` Quick Find frontend modal:
+  - [x] Instant search-as-you-type results (150 ms debounce, abort + stale-response guard).
+  - [x] Highlight matched query text in previews (`<mark>` React nodes, never raw HTML).
+  - [x] Recent pages history list (localStorage cache, workspace-scoped, server-refreshable).
+  - Keyboard navigation (`↑`/`↓`, `Home`/`End`, `Enter`, `Escape`) and ARIA listbox semantics.
 
 ---
 
