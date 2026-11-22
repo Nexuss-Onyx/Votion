@@ -13,7 +13,7 @@
 | **Phase 0: Monorepo & Infrastructure** | `tooling/*`, `wasmer.toml` | ✅ Completed | 8 / 8 |
 | **Phase 1: Core Contracts & Database** | `@votion/types`, `@votion/db` | ✅ Completed | 12 / 12 |
 | **Phase 2: Client State & Offline Engine**| `@votion/sync-client` | ✅ Completed | 10 / 10 |
-| **Phase 3: Block Editor & Canvas** | `@votion/editor` | ⬜ Not Started | 0 / 22 |
+| **Phase 3: Block Editor & Canvas** | `@votion/editor` | ✅ Completed | 22 / 22 |
 | **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ⬜ Not Started | 0 / 20 |
 | **Phase 5: Backend API & Transactions** | `apps/server` | ✅ Completed | 14 / 14 |
 | **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ✅ Completed | 9 / 9 |
@@ -104,56 +104,56 @@
 ## Phase 3: Block Editor & Canvas Engine (`@votion/editor`)
 
 ### 3.1 Core Canvas & Layout
-- [ ] Build `BlockCanvas` component to recursively render block trees from `page.content`.
-- [ ] Implement `BlockWrapper` component with hover action controls:
-  - [ ] 6-dot drag handle button.
-  - [ ] Quick `+` block insertion button.
-  - [ ] Delete / Duplicate / Copy link context menu.
-- [ ] Implement `ColumnLayout`:
-  - [ ] `column_list` flex container.
-  - [ ] Draggable percentage-based resize dividers between columns.
-  - [ ] Convert single blocks into horizontal columns on drag-and-drop.
+- [x] Build `BlockCanvas` component to recursively render block trees from `page.content`.
+- [x] Implement `BlockWrapper` component with hover action controls:
+- [x] 6-dot drag handle button.
+- [x] Quick `+` block insertion button.
+- [x] Delete / Duplicate / Copy link context menu.
+- [x] Implement `ColumnLayout`:
+- [x] `column_list` flex container.
+- [x] Draggable percentage-based resize dividers between columns.
+- [x] Convert single blocks into horizontal columns on drag-and-drop.
 
 ### 3.2 Block Renderers
-- [ ] Text Block (`TextBlock.tsx`) with contenteditable and rich-text spans.
-- [ ] Heading Blocks (`HeadingBlock.tsx` for H1, H2, H3 with toggle-collapse toggle).
-- [ ] To-Do Block (`TodoBlock.tsx`) with checkbox toggle and strikethrough styling.
-- [ ] List Blocks (`bulleted_list_item`, `numbered_list_item` with auto-increment numbers).
-- [ ] Toggle Block (`ToggleBlock.tsx`) with expandable child block container.
-- [ ] Quote Block (`QuoteBlock.tsx`) with accent left border.
-- [ ] Callout Block (`CalloutBlock.tsx`) with emoji picker and background tint palette.
-- [ ] Divider Block (`DividerBlock.tsx` `<hr />`).
-- [ ] Code Block (`CodeBlock.tsx`) with Prism/Highlight.js syntax highlighting, language selector, line numbers, and copy button.
-- [ ] Math Block (`MathBlock.tsx`) with inline/block KaTeX equation editing.
-- [ ] Media Blocks:
-  - [ ] Image block with upload preview, URL loader, and width resize handles.
-  - [ ] Video/Audio block with custom media player controls.
-  - [ ] File attachment block with download link and file size metadata.
-  - [ ] Web Bookmark block with auto OpenGraph scraping card.
-  - [ ] Sandboxed Embed block (YouTube, Figma, GitHub, CodePen).
-- [ ] Synced Block (`SyncedBlock.tsx`) pointing to master block ID.
+- [x] Text Block (`TextBlock.tsx`) with contenteditable and rich-text spans.
+- [x] Heading Blocks (`HeadingBlock.tsx` for H1, H2, H3 with toggle-collapse toggle).
+- [x] To-Do Block (`TodoBlock.tsx`) with checkbox toggle and strikethrough styling.
+- [x] List Blocks (`bulleted_list_item`, `numbered_list_item` with auto-increment numbers).
+- [x] Toggle Block (`ToggleBlock.tsx`) with expandable child block container.
+- [x] Quote Block (`QuoteBlock.tsx`) with accent left border.
+- [x] Callout Block (`CalloutBlock.tsx`) with emoji picker and background tint palette.
+- [x] Divider Block (`DividerBlock.tsx` `<hr />`).
+- [x] Code Block (`CodeBlock.tsx`) with Prism/Highlight.js syntax highlighting, language selector, line numbers, and copy button.
+- [x] Math Block (`MathBlock.tsx`) with inline/block KaTeX equation editing.
+- [x] Media Blocks:
+- [x] Image block with upload preview, URL loader, and width resize handles.
+- [x] Video/Audio block with custom media player controls.
+- [x] File attachment block with download link and file size metadata.
+- [x] Web Bookmark block with auto OpenGraph scraping card.
+- [x] Sandboxed Embed block (YouTube, Figma, GitHub, CodePen).
+- [x] Synced Block (`SyncedBlock.tsx`) pointing to master block ID.
 
 ### 3.3 Editor Interactions & Shortcuts
-- [ ] Build Slash Command Popover (`/`):
-  - [ ] Filterable block catalog list.
-  - [ ] Keyboard navigation (Arrow Up/Down, Enter to insert, Escape to close).
-- [ ] Build Inline Floating Formatting Toolbar (appears on text selection):
-  - [ ] Bold, Italic, Strikethrough, Underline, Code, Color highlight, Link insertion, Comment anchor.
-- [ ] Implement Markdown auto-formatting shortcuts:
-  - [ ] `# ` $\rightarrow$ Heading 1, `## ` $\rightarrow$ Heading 2, `### ` $\rightarrow$ Heading 3
-  - [ ] `- ` or `* ` $\rightarrow$ Bulleted List
-  - [ ] `1. ` $\rightarrow$ Numbered List
-  - [ ] `[] ` $\rightarrow$ To-Do Checkbox
-  - [ ] `> ` $\rightarrow$ Quote
-  - [ ] `---` $\rightarrow$ Divider
-  - [ ] ` ``` ` $\rightarrow$ Code Block
-- [ ] Implement Drag-and-Drop system:
-  - [ ] Visual blue drop line indicators (above, below, left, right).
-  - [ ] Relative list reordering math (`listAfter`, `listBefore`).
-- [ ] Implement Multi-Block Selection:
-  - [ ] Click-and-drag bounding box (lasso selection).
-  - [ ] Shift + Arrow block range selection.
-  - [ ] Bulk block actions (indent/outdent with Tab/Shift+Tab, bulk delete, bulk move).
+- [x] Build Slash Command Popover (`/`):
+- [x] Filterable block catalog list.
+- [x] Keyboard navigation (Arrow Up/Down, Enter to insert, Escape to close).
+- [x] Build Inline Floating Formatting Toolbar (appears on text selection):
+- [x] Bold, Italic, Strikethrough, Underline, Code, Color highlight, Link insertion, Comment anchor.
+- [x] Implement Markdown auto-formatting shortcuts:
+- [x] `# ` $\rightarrow$ Heading 1, `## ` $\rightarrow$ Heading 2, `### ` $\rightarrow$ Heading 3
+- [x] `- ` or `* ` $\rightarrow$ Bulleted List
+- [x] `1. ` $\rightarrow$ Numbered List
+- [x] `[] ` $\rightarrow$ To-Do Checkbox
+- [x] `> ` $\rightarrow$ Quote
+- [x] `---` $\rightarrow$ Divider
+- [x] ` ``` ` $\rightarrow$ Code Block
+- [x] Implement Drag-and-Drop system:
+- [x] Visual blue drop line indicators (above, below, left, right).
+- [x] Relative list reordering math (`listAfter`, `listBefore`).
+- [x] Implement Multi-Block Selection:
+- [x] Click-and-drag bounding box (lasso selection).
+- [x] Shift + Arrow block range selection.
+- [x] Bulk block actions (indent/outdent with Tab/Shift+Tab, bulk delete, bulk move).
 
 ---
 
