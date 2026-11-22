@@ -25,10 +25,12 @@ export interface SyncedBlockProps {
 export function SyncedBlock({
   block,
   spaceId,
-  editor,
 }: SyncedBlockProps): JSX.Element {
   const masterId = block.properties.synced_from_block_id as UUID | undefined;
   const stack = useContext(SyncStackContext);
+  // Hooks must be called unconditionally — fall back to a no-op id when the
+  // master is not configured yet.
+  const master = useBlock(masterId ?? ('' as UUID));
 
   if (!masterId) {
     return (
@@ -46,7 +48,6 @@ export function SyncedBlock({
     );
   }
 
-  const master = useBlock(masterId);
   const extendedStack = new Set(stack);
   extendedStack.add(masterId);
 

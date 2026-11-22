@@ -20,7 +20,7 @@
 | **Phase 7: Access Control & Permissions** | `@votion/acl` | ✅ Completed | 8 / 8 |
 | **Phase 8: Search & Discovery Engine** | `@votion/search` | ✅ Completed | 7 / 7 |
 | **Phase 9: Background Worker Fleet** | `apps/task-worker` | ✅ Completed | 11 / 11 |
-| **Phase 10: Web Application Shell** | `apps/web` | ⬜ Not Started | 0 / 16 |
+| **Phase 10: Web Application Shell** | `apps/web` | ✅ Completed | 16 / 16 |
 | **Phase 11: Developer API & Webhooks** | `apps/server/v1` | ✅ Completed | 8 / 8 |
 | **Phase 12: Wasmer Edge Deployment** | `wasmer.toml`, Wasmer CLI | ⬜ Not Started | 0 / 8 |
 
@@ -313,24 +313,24 @@
 
 ## Phase 10: Web Application Shell & Workspace UX (`apps/web`)
 
-- [ ] Build collapsible Sidebar navigation:
-  - [ ] Workspace switcher dropdown.
-  - [ ] Quick Find (`Cmd+K`) button.
-  - [ ] Recursive nested page tree with expandable chevron toggles.
-  - [ ] Favorites / Pinned pages section.
-  - [ ] Teamspaces section.
-  - [ ] Private pages section.
-  - [ ] Trash modal (view soft-deleted pages, restore, permanent purge).
-- [ ] Build Top Navigation Bar:
-  - [ ] Interactive breadcrumb path.
-  - [ ] Page cover and icon customizer (emoji picker + image upload).
-  - [ ] Share / Permissions modal (invite members, copy public link).
-  - [ ] Live presence user avatar badges.
-  - [ ] Page options menu (Export, Full width toggle, Font toggle, Delete).
-- [ ] Build Discussion & Comment System:
-  - [ ] Page-level discussion thread.
-  - [ ] Text-anchored inline comments with resolve/unresolve workflows.
-- [ ] Build Notification Inbox (`@` mentions, comment replies).
+- [x] Build collapsible Sidebar navigation:
+  - [x] Workspace switcher dropdown.
+  - [x] Quick Find (`Cmd+K`) button.
+  - [x] Recursive nested page tree with expandable chevron toggles.
+  - [x] Favorites / Pinned pages section.
+  - [x] Teamspaces section.
+  - [x] Private pages section.
+  - [x] Trash modal (view soft-deleted pages, restore, permanent purge).
+- [x] Build Top Navigation Bar:
+  - [x] Interactive breadcrumb path.
+  - [x] Page cover and icon customizer (emoji picker + image upload).
+  - [x] Share / Permissions modal (invite members, copy public link).
+  - [x] Live presence user avatar badges.
+  - [x] Page options menu (Export, Full width toggle, Font toggle, Delete).
+- [x] Build Discussion & Comment System:
+  - [x] Page-level discussion thread.
+  - [x] Text-anchored inline comments with resolve/unresolve workflows.
+- [x] Build Notification Inbox (`@` mentions, comment replies).
 
 ---
 

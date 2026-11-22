@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  background-color: #ffffff;
+  color: #37352f;
+}
+
+/* Slim, Notion-like scrollbars. */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(15, 27, 38, 0.18);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 27, 38, 0.3);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Highlighted text spans that can be anchored to an inline comment. */
+mark.comment-anchor {
+  background: #fef3c7;
+  color: #37352f;
+  border-radius: 3px;
+  padding: 0 2px;
+  cursor: pointer;
+  border-bottom: 2px solid #fcd34d;
+}
+mark.comment-anchor[data-comment-resolved='true'] {
+  background: transparent;
+  border-bottom: 2px dashed #cbd5e1;
+  color: #787774;
+}

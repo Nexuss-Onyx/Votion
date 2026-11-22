@@ -12,7 +12,6 @@ import { DividerBlock } from './DividerBlock.js';
 import { CodeBlock } from './CodeBlock.js';
 import { MathBlock } from './MathBlock.js';
 import { MediaBlock } from './MediaBlock.js';
-import { BookmarkBlock } from './BookmarkBlock.js';
 import { SyncedBlock } from './SyncedBlock.js';
 import { ColumnLayout } from '../components/ColumnLayout.js';
 import type { ColumnLayoutProps } from '../components/ColumnLayout.js';
@@ -121,15 +120,14 @@ export function BlockRenderer({
 /** Fallback renderer for block types without a dedicated component. */
 function DefaultBlock({
   block,
-  index,
 }: {
   block: Block;
   index?: number;
 }): JSX.Element {
-  const title = (block.properties.title as any) ?? [];
+  const title = block.properties.title ?? [];
   const plain = Array.isArray(title)
     ? title
-        .map((segment) => (Array.isArray(segment) ? segment[0] : ''))
+        .map((segment) => segment[0])
         .join('')
     : '';
   return (

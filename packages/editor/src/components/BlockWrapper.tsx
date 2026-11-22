@@ -4,11 +4,10 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
 } from 'react';
-import { GripVertical, Plus } from 'lucide-react';
-import type { Block, BlockType, UUID } from '@votion/types';
+import { Plus } from 'lucide-react';
+import type { Block, UUID } from '@votion/types';
 import { clsx } from 'clsx';
 import { BlockRenderer } from '../blocks/BlockRenderer.js';
-import { useIsBlockSelected } from './BlockSelection.js';
 import type { BlockEditorActions } from '../lib/editor.js';
 
 export interface BlockWrapperProps {
@@ -33,22 +32,6 @@ export interface BlockWrapperProps {
   selectBlock: (id: UUID, multi?: boolean) => void;
 }
 
-const TURN_INTO_TYPES: BlockType[] = [
-  'text',
-  'heading_1',
-  'heading_2',
-  'heading_3',
-  'to_do',
-  'bulleted_list_item',
-  'numbered_list_item',
-  'toggle',
-  'quote',
-  'callout',
-  'divider',
-  'code',
-  'math',
-];
-
 export function BlockWrapper({
   block,
   index,
@@ -64,7 +47,6 @@ export function BlockWrapper({
     y: number;
   } | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const selected = useIsBlockSelected(block.id);
 
   const handleContextMenu = useCallback(
     (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -129,14 +111,6 @@ export function BlockWrapper({
     editor.duplicateBlock(block.id);
     setContextMenu(null);
   }, [block.id, editor]);
-
-  const handleConvert = useCallback(
-    (type: BlockType) => {
-      editor.convertBlock(block.id, type);
-      setContextMenu(null);
-    },
-    [block.id, editor],
-  );
 
   return (
     <div

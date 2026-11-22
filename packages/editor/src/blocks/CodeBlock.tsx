@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import Prism from 'prismjs';
-import type { Block, RichText, UUID } from '@votion/types';
+import type { Block, UUID } from '@votion/types';
 import { richTextToPlainText } from '@votion/types';
 import type { BlockEditorActions } from '../lib/editor.js';
-import { clsx } from 'clsx';
 
 export interface CodeBlockProps {
   block: Block;
@@ -57,7 +56,7 @@ export function CodeBlock({
         }
       });
     }
-    return (Prism as any).highlight(code, grammar as any, language);
+    return Prism.highlight(code, grammar as never, language) as never;
   }, [code, language, grammar]);
 
   const handleLanguageChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {

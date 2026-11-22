@@ -6,16 +6,14 @@ import {
   useEffect,
   type MouseEvent as ReactMouseEvent,
 } from 'react';
-import type { Block, BlockType, UUID } from '@votion/types';
+import type { BlockType, UUID } from '@votion/types';
 import { getRecordStore } from '@votion/sync-client';
 import { useChildBlocks } from '../lib/store.js';
-import { createBlockEditor, type BlockEditorActions } from '../lib/editor.js';
+import { createBlockEditor } from '../lib/editor.js';
 import { BlockWrapper } from './BlockWrapper.js';
 import { Point, lassoRect } from '../dnd/MultiBlockSelection.js';
-import { BlockRenderer } from '../blocks/BlockRenderer.js';
 import { SlashMenu } from '../shortcuts/SlashMenu.js';
-import { BlockSelectionProvider, useBlockSelection } from './BlockSelection.js';
-import { MultiBlockSelection } from '../dnd/MultiBlockSelection.js';
+import { BlockSelectionProvider } from './BlockSelection.js';
 import clsx from 'clsx';
 
 export interface BlockCanvasProps {

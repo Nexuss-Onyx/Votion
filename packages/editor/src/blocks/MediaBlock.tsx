@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Block, RichText, UUID } from '@votion/types';
 import { RichTextRenderer } from '../richtext/RichTextRenderer.js';
-import { richTextToPlainText } from '@votion/types';
 import type { BlockEditorActions } from '../lib/editor.js';
 import { BookmarkBlock } from './BookmarkBlock.js';
-import { clsx } from 'clsx';
 
 export interface MediaBlockProps {
   block: Block;
@@ -129,26 +127,6 @@ function FileMedia({ block }: { block: Block }) {
     <div className="media-block my-2 flex items-center gap-2 rounded border border-gray-200 bg-gray-50 p-3">
       <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
         📎 {url.split('/').pop() ?? url}
-      </a>
-    </div>
-  );
-}
-
-/** Web bookmark block: a card rendering the source URL as a link preview. */
-function BookmarkMedia({ block }: { block: Block }) {
-  const url = sourceOf(block);
-  const title: RichText = block.properties.title ?? [];
-  const plain = richTextToPlainText(title) || url;
-  return (
-    <div className="media-block my-2 flex flex-col rounded border border-gray-200 bg-white overflow-hidden">
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block p-4 text-left"
-      >
-        <div className="text-sm font-medium text-gray-900 truncate">{plain}</div>
-        <div className="text-xs text-gray-500 mt-1 truncate">{url}</div>
       </a>
     </div>
   );

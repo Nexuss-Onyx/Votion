@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import katex from 'katex';
-import type { Block, RichText, UUID } from '@votion/types';
+import type { Block, UUID } from '@votion/types';
 import { richTextToPlainText } from '@votion/types';
 import type { BlockEditorActions } from '../lib/editor.js';
 

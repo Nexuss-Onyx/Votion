@@ -4,7 +4,6 @@ import type {
   RichText,
   RichTextSegment,
   TextColor,
-  TextModifier,
 } from '@votion/types';
 import katex from 'katex';
 import { clsx } from 'clsx';

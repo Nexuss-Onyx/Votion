@@ -1,9 +1,7 @@
 import { useCallback } from 'react';
 import type { Block, RichText, UUID } from '@votion/types';
 import { RichTextRenderer } from '../richtext/RichTextRenderer.js';
-import { richTextToPlainText } from '@votion/types';
 import type { BlockEditorActions } from '../lib/editor.js';
-import { clsx } from 'clsx';
 
 export interface ListBlockProps {
   block: Block;

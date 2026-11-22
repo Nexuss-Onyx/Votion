@@ -4,7 +4,6 @@ import { RichTextRenderer } from '../richtext/RichTextRenderer.js';
 import { BlockCanvas } from '../components/BlockCanvas.js';
 import type { BlockEditorActions } from '../lib/editor.js';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { clsx } from 'clsx';
 
 export interface ToggleBlockProps {
   block: Block;

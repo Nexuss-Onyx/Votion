@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Block, BlockFormat, RichText, UUID } from '@votion/types';
+import type { Block, RichText, UUID } from '@votion/types';
 import { RichTextRenderer } from '../richtext/RichTextRenderer.js';
 import type { BlockEditorActions } from '../lib/editor.js';
 import { clsx } from 'clsx';

@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import type { BackgroundColor, HighlightColor, TextColor } from '@votion/types';
 import { clsx } from 'clsx';
 
 export type FloatingToolbarFormat =
@@ -31,19 +30,6 @@ const FORMAT_LABELS: Record<FloatingToolbarFormat, string> = {
   link: 'Link',
 };
 
-const COLOR_TOKENS: (TextColor | BackgroundColor)[] = [
-  'default',
-  'gray',
-  'brown',
-  'orange',
-  'yellow',
-  'green',
-  'blue',
-  'purple',
-  'pink',
-  'red',
-];
-
 /**
  * Bubble formatting menu that appears near a text selection. Emits
  * `onFormat` when an action is chosen; the caller applies the corresponding
@@ -69,16 +55,6 @@ export function FloatingToolbar({
       onFormat('link', url);
     }
   }, [onFormat]);
-
-  const handleColor = useCallback(
-    (color: TextColor | BackgroundColor) => () => {
-      onFormat(
-        color.endsWith('_background') ? 'highlight' : 'color',
-        color as HighlightColor,
-      );
-    },
-    [onFormat],
-  );
 
   if (!visible) return null;
 

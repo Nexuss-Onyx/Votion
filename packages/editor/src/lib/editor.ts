@@ -197,7 +197,7 @@ export function createBlockEditor(spaceId: UUID): BlockEditorActions {
     if (!block || !anchor || block.parent_id !== anchor.parent_id) return;
     const parent = state.blocks[block.parent_id];
     if (!parent) return;
-    let content = parent.content.filter((id) => id !== blockId);
+    const content = parent.content.filter((id) => id !== blockId);
     const anchorIndex = content.indexOf(anchorId);
     if (anchorIndex === -1) return;
     content.splice(

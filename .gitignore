@@ -33,3 +33,9 @@ Thumbs.db
 
 # Turborepo
 .turbo/
+
+# TypeScript incremental state
+tsconfig.tsbuildinfo
+
+# Next.js generated env types
+next-env.d.ts

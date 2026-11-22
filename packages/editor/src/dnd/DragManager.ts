@@ -78,7 +78,7 @@ export function dropZoneToOperation(
   content: UUID[],
   targetId: UUID,
   zone: DropZone,
-  movedId: UUID,
+  _movedId: UUID,
 ): DropResult {
   const index = computeDropIndex(content, targetId, zone);
   const anchorId = content[index] ?? null;

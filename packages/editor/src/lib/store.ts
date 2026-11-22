@@ -10,7 +10,6 @@ import {
 } from '@votion/sync-client';
 import {
   selectChildBlocksMemo,
-  selectBlockMemo,
   type SelectorState,
 } from '@votion/sync-client';
 

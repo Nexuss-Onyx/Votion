@@ -17,7 +17,7 @@ export function BookmarkBlock({
   const [source] = block.properties.source ?? [['']];
   const url = source[0];
   const title: string = block.properties.title
-    ? richTextToPlainText(block.properties.title as any)
+    ? richTextToPlainText(block.properties.title ?? [])
     : '';
   const plain = title || url;
 
