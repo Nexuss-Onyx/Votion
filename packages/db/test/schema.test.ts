@@ -23,12 +23,15 @@ import type {
 } from '@votion/types';
 
 import {
+  API_KEY_CAPABILITIES,
   PARENT_TABLES,
   PERMISSION_ROLES,
   PRINCIPAL_TYPES,
   VIEW_TYPES,
   WORKSPACE_ROLES,
   accounts,
+  apiKeys,
+  automationRules,
   blockParentTableEnum,
   blocks,
   collectionViewTypeEnum,
@@ -39,6 +42,8 @@ import {
   principalTypeEnum,
   transactionRecords,
   users,
+  webhookDeliveries,
+  webhookSubscriptions,
   workspaceMembers,
   workspaceRoleEnum,
   workspaces,
@@ -403,5 +408,116 @@ describe('generated SQL migrations', () => {
   it('installs the required PostgreSQL extensions', () => {
     expect(migrationSql).toContain('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
     expect(migrationSql).toContain('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+  });
+});
+
+// =============================================================
+// Phase 11: Developer API tables
+// =============================================================
+
+describe('Phase 11 developer API tables', () => {
+  it('declares the api key, webhook and automation tables', () => {
+    expect([
+      getTableName(apiKeys),
+      getTableName(webhookSubscriptions),
+      getTableName(webhookDeliveries),
+      getTableName(automationRules),
+    ]).toEqual([
+      'api_keys',
+      'webhook_subscriptions',
+      'webhook_deliveries',
+      'automation_rules',
+    ]);
+  });
+
+  it('stores only the SHA-256 digest of integration tokens', () => {
+    expect(columnNames(apiKeys)).toEqual([
+      'id',
+      'workspace_id',
+      'name',
+      'token_hash',
+      'token_prefix',
+      'capabilities',
+      'created_by_id',
+      'last_used_at',
+      'expires_at',
+      'revoked_at',
+      'created_at',
+    ]);
+    expect(requireIndex(apiKeys, 'idx_api_keys_token_hash').config.unique).toBe(true);
+    expect(apiKeys.capabilities.dataType).toBe('json');
+  });
+
+  it('declares webhook subscription and delivery columns', () => {
+    expect(columnNames(webhookSubscriptions)).toEqual([
+      'id',
+      'workspace_id',
+      'url',
+      'secret',
+      'events',
+      'alive',
+      'created_by_id',
+      'created_at',
+      'updated_at',
+    ]);
+    expect(columnNames(webhookDeliveries)).toEqual([
+      'id',
+      'subscription_id',
+      'event',
+      'payload',
+      'signature',
+      'attempts',
+      'response_status',
+      'error',
+      'created_at',
+    ]);
+  });
+
+  it('declares automation rule columns and JSONB trigger/actions', () => {
+    expect(columnNames(automationRules)).toEqual([
+      'id',
+      'workspace_id',
+      'name',
+      'description',
+      'trigger',
+      'actions',
+      'alive',
+      'created_by_id',
+      'created_at',
+      'updated_at',
+    ]);
+    expect(automationRules.trigger.dataType).toBe('json');
+    expect(automationRules.actions.dataType).toBe('json');
+  });
+
+  it('mirrors the API key capability scope union', () => {
+    expect([...API_KEY_CAPABILITIES]).toEqual([
+      'read',
+      'write',
+      'manage',
+      'webhooks',
+      'automations',
+    ]);
+  });
+
+  it('migrates the developer API tables and unique token index', () => {
+    const drizzleDir = fileURLToPath(new URL('../drizzle', import.meta.url));
+    const sqlFiles = readdirSync(drizzleDir)
+      .filter((file) => file.endsWith('.sql'))
+      .sort();
+    const migrationSql = sqlFiles
+      .map((file) => readFileSync(join(drizzleDir, file), 'utf8'))
+      .join('\n');
+    for (const table of [
+      'api_keys',
+      'webhook_subscriptions',
+      'webhook_deliveries',
+      'automation_rules',
+    ]) {
+      expect(migrationSql).toContain(`CREATE TABLE "${table}"`);
+    }
+    expect(migrationSql).toContain(
+      'CREATE UNIQUE INDEX "idx_api_keys_token_hash" ON "api_keys" USING btree ("token_hash")',
+    );
   });
 });

@@ -23,6 +23,8 @@ import type {
   WorkspaceRole,
 } from '@votion/types';
 
+import type { AutomationAction, AutomationTrigger } from '../api/v1/automations/types.js';
+
 /** Persisted block row (mirrors the `blocks` table). */
 export interface BlockRecord {
   id: UUID;
@@ -129,6 +131,115 @@ export interface TransactionRecordRow {
   createdAt: Date;
 }
 
+/** Persisted integration token row (mirrors the `api_keys` table). */
+export interface ApiKeyRecord {
+  id: UUID;
+  workspaceId: UUID;
+  name: string;
+  /** SHA-256 hex digest of the plaintext `secret_...` token. */
+  tokenHash: string;
+  tokenPrefix: string;
+  capabilities: string[];
+  createdById: UUID | null;
+  lastUsedAt: Date | null;
+  expiresAt: Date | null;
+  revokedAt: Date | null;
+  createdAt: Date;
+}
+
+/** Input for creating an integration token. */
+export interface NewApiKey {
+  id?: UUID;
+  workspaceId: UUID;
+  name: string;
+  tokenHash: string;
+  tokenPrefix: string;
+  capabilities?: string[];
+  createdById?: UUID | null;
+  expiresAt?: Date | null;
+}
+
+/** Persisted webhook subscription row (mirrors `webhook_subscriptions`). */
+export interface WebhookSubscriptionRecord {
+  id: UUID;
+  workspaceId: UUID;
+  url: string;
+  secret: string;
+  events: string[];
+  alive: boolean;
+  createdById: UUID | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** Input for creating a webhook subscription. */
+export interface NewWebhookSubscription {
+  id?: UUID;
+  workspaceId: UUID;
+  url: string;
+  secret: string;
+  events?: string[];
+  createdById?: UUID | null;
+}
+
+/** Persisted webhook delivery attempt row (mirrors `webhook_deliveries`). */
+export interface WebhookDeliveryRecord {
+  id: UUID;
+  subscriptionId: UUID;
+  event: string;
+  payload: unknown;
+  signature: string;
+  attempts: number;
+  responseStatus: number | null;
+  error: string | null;
+  createdAt: Date;
+}
+
+/** Input for recording a webhook delivery. */
+export interface NewWebhookDelivery {
+  id?: UUID;
+  subscriptionId: UUID;
+  event: string;
+  payload: unknown;
+  signature: string;
+  attempts: number;
+  responseStatus?: number | null;
+  error?: string | null;
+}
+
+/** Persisted automation rule row (mirrors `automation_rules`). */
+export interface AutomationRuleRecord {
+  id: UUID;
+  workspaceId: UUID;
+  name: string;
+  description: string | null;
+  trigger: AutomationTrigger;
+  actions: AutomationAction[];
+  alive: boolean;
+  createdById: UUID | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** Input for creating an automation rule. */
+export interface NewAutomationRule {
+  id?: UUID;
+  workspaceId: UUID;
+  name: string;
+  description?: string | null;
+  trigger: AutomationTrigger;
+  actions: AutomationAction[];
+  createdById?: UUID | null;
+}
+
+/** Partial block mutation accepted by {@link DataStore.updateBlock}. */
+export interface BlockPatch {
+  properties?: BlockProperties;
+  format?: BlockFormat;
+  content?: UUID[];
+  alive?: boolean;
+}
+
 /** Outcome of applying one transaction inside a batch. */
 export interface AppliedTransaction {
   transactionId: UUID;
@@ -230,6 +341,25 @@ export interface DataStore {
   createBlock(input: NewBlock): Promise<BlockRecord>;
   /** All alive rows of a collection (`parent_table = 'collection'`). */
   listCollectionRows(collectionId: UUID): Promise<BlockRecord[]>;
+  /** Every alive block in a space (Developer API search / traversal). */
+  listBlocksBySpace(spaceId: UUID): Promise<BlockRecord[]>;
+  /**
+   * Direct, atomic single-row mutation used by the Developer API and the
+   * automation engine. JSONB payloads are merged; `alive` supports soft
+   * deletes. Bumps `version` and stamps `last_edited_*`.
+   */
+  updateBlock(
+    id: UUID,
+    patch: BlockPatch,
+    editedById?: UUID | null,
+  ): Promise<BlockRecord | null>;
+
+  // ---- integration tokens (Developer API) ---------------------------------
+  createApiKey(input: NewApiKey): Promise<ApiKeyRecord>;
+  findApiKeyByTokenHash(tokenHash: string): Promise<ApiKeyRecord | null>;
+  listApiKeys(workspaceId: UUID): Promise<ApiKeyRecord[]>;
+  revokeApiKey(id: UUID, workspaceId: UUID): Promise<boolean>;
+  touchApiKeyLastUsed(id: UUID): Promise<void>;
 
   // ---- collections & views ------------------------------------------------
   findCollectionById(id: UUID): Promise<CollectionRecord | null>;
@@ -239,6 +369,39 @@ export interface DataStore {
   listViewsForCollection(collectionId: UUID): Promise<CollectionViewRecord[]>;
   createCollection(input: NewCollection): Promise<CollectionRecord>;
   createCollectionView(input: NewCollectionView): Promise<CollectionViewRecord>;
+  /** Every alive collection in a space (Developer API search). */
+  listCollectionsBySpace(spaceId: UUID): Promise<CollectionRecord[]>;
+  /** Updates collection metadata (`name`, `description`, `schema`, `alive`). */
+  updateCollection(
+    id: UUID,
+    patch: Partial<Pick<CollectionRecord, 'name' | 'description' | 'schema' | 'alive'>>,
+  ): Promise<CollectionRecord | null>;
+
+  // ---- webhook subscriptions (Developer API) ------------------------------
+  createWebhookSubscription(
+    input: NewWebhookSubscription,
+  ): Promise<WebhookSubscriptionRecord>;
+  findWebhookSubscriptionById(id: UUID): Promise<WebhookSubscriptionRecord | null>;
+  listWebhookSubscriptions(workspaceId: UUID): Promise<WebhookSubscriptionRecord[]>;
+  /** Alive subscriptions for a space, optionally filtered by event name. */
+  listActiveWebhookSubscriptions(
+    workspaceId: UUID,
+    events?: string[],
+  ): Promise<WebhookSubscriptionRecord[]>;
+  deleteWebhookSubscription(id: UUID, workspaceId: UUID): Promise<boolean>;
+  createWebhookDelivery(input: NewWebhookDelivery): Promise<WebhookDeliveryRecord>;
+  listWebhookDeliveries(subscriptionId: UUID): Promise<WebhookDeliveryRecord[]>;
+
+  // ---- automation rules (Developer API) -----------------------------------
+  createAutomationRule(input: NewAutomationRule): Promise<AutomationRuleRecord>;
+  findAutomationRuleById(id: UUID): Promise<AutomationRuleRecord | null>;
+  listAutomationRules(workspaceId: UUID): Promise<AutomationRuleRecord[]>;
+  /** Alive rules for a space, optionally filtered by trigger type. */
+  listActiveAutomationRules(
+    workspaceId: UUID,
+    triggerType?: string,
+  ): Promise<AutomationRuleRecord[]>;
+  deleteAutomationRule(id: UUID, workspaceId: UUID): Promise<boolean>;
 
   // ---- transactions (atomic) ----------------------------------------------
   /**

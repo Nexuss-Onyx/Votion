@@ -18,6 +18,13 @@ import type { BlockRecord } from '../store/types.js';
 
 /** Extracts a comparable scalar from a block property value. */
 export function propertyScalar(block: BlockRecord, property: string): unknown {
+  // Audit timestamps are addressable as pseudo-properties by view queries.
+  if (property === 'last_edited_time') {
+    return block.lastEditedTime.toISOString();
+  }
+  if (property === 'created_time') {
+    return block.createdTime.toISOString();
+  }
   const value = block.properties[property];
   if (value === undefined || value === null) {
     return undefined;
@@ -45,11 +52,29 @@ export function propertyScalar(block: BlockRecord, property: string): unknown {
     if (typeof obj['start_date'] === 'string') {
       return obj['start_date'];
     }
+    if (typeof obj['start'] === 'string') {
+      return obj['start'];
+    }
     if (typeof obj['number'] === 'number') {
       return obj['number'];
     }
     if (typeof obj['checked'] === 'boolean') {
       return obj['checked'];
+    }
+    if (typeof obj['select'] === 'string') {
+      return obj['select'];
+    }
+    if (typeof obj['status'] === 'string') {
+      return obj['status'];
+    }
+    if (typeof obj['url'] === 'string') {
+      return obj['url'];
+    }
+    if (typeof obj['email'] === 'string') {
+      return obj['email'];
+    }
+    if (Array.isArray(obj['multi_select'])) {
+      return (obj['multi_select'] as unknown[]).map((entry) => String(entry)).join(',');
     }
   }
   return value;

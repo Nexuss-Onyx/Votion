@@ -15,19 +15,28 @@ import type { Transaction, UUID, WorkspaceRole } from '@votion/types';
 
 import { OperationError, applyOperation, cloneJson } from '../lib/jsonpatch.js';
 import type {
+  ApiKeyRecord,
   AppliedTransaction,
+  AutomationRuleRecord,
+  BlockPatch,
   BlockRecord,
   CollectionRecord,
   CollectionViewRecord,
   DataStore,
+  NewApiKey,
+  NewAutomationRule,
   NewBlock,
   NewCollection,
   NewCollectionView,
   NewUser,
+  NewWebhookDelivery,
+  NewWebhookSubscription,
   NewWorkspace,
   RefreshTokenRecord,
   TransactionRecordRow,
   UserRecord,
+  WebhookDeliveryRecord,
+  WebhookSubscriptionRecord,
   WorkspaceMemberRecord,
   WorkspaceRecord,
 } from './types.js';
@@ -42,6 +51,10 @@ interface MemoryState {
   collectionViews: Map<UUID, CollectionViewRecord>;
   transactionRecords: TransactionRecordRow[];
   transactionSeq: number;
+  apiKeys: Map<UUID, ApiKeyRecord>;
+  webhookSubscriptions: Map<UUID, WebhookSubscriptionRecord>;
+  webhookDeliveries: Map<UUID, WebhookDeliveryRecord>;
+  automationRules: Map<UUID, AutomationRuleRecord>;
 }
 
 function emptyState(): MemoryState {
@@ -55,6 +68,10 @@ function emptyState(): MemoryState {
     collectionViews: new Map(),
     transactionRecords: [],
     transactionSeq: 0,
+    apiKeys: new Map(),
+    webhookSubscriptions: new Map(),
+    webhookDeliveries: new Map(),
+    automationRules: new Map(),
   };
 }
 
@@ -321,6 +338,101 @@ export class InMemoryStore implements DataStore {
     return result;
   }
 
+  async listBlocksBySpace(spaceId: UUID): Promise<BlockRecord[]> {
+    const result: BlockRecord[] = [];
+    for (const block of this.state.blocks.values()) {
+      if (block.spaceId === spaceId && block.alive) {
+        result.push(cloneJson(block));
+      }
+    }
+    return result;
+  }
+
+  async updateBlock(
+    id: UUID,
+    patch: BlockPatch,
+    editedById?: UUID | null,
+  ): Promise<BlockRecord | null> {
+    const block = this.state.blocks.get(id);
+    if (!block) {
+      return null;
+    }
+    if (patch.properties !== undefined) {
+      block.properties = {
+        ...cloneJson(block.properties),
+        ...cloneJson(patch.properties),
+      };
+    }
+    if (patch.format !== undefined) {
+      block.format = { ...cloneJson(block.format), ...cloneJson(patch.format) };
+    }
+    if (patch.content !== undefined) {
+      block.content = [...patch.content];
+    }
+    if (patch.alive !== undefined) {
+      block.alive = patch.alive;
+    }
+    block.version += 1;
+    block.lastEditedTime = now();
+    block.lastEditedById = editedById === undefined ? block.lastEditedById : editedById;
+    return cloneJson(block);
+  }
+
+  // ---- integration tokens -------------------------------------------------
+
+  async createApiKey(input: NewApiKey): Promise<ApiKeyRecord> {
+    const record: ApiKeyRecord = {
+      id: input.id ?? randomUUID(),
+      workspaceId: input.workspaceId,
+      name: input.name,
+      tokenHash: input.tokenHash,
+      tokenPrefix: input.tokenPrefix,
+      capabilities: [...(input.capabilities ?? [])],
+      createdById: input.createdById ?? null,
+      lastUsedAt: null,
+      expiresAt: input.expiresAt ?? null,
+      revokedAt: null,
+      createdAt: now(),
+    };
+    this.state.apiKeys.set(record.id, record);
+    return cloneJson(record);
+  }
+
+  async findApiKeyByTokenHash(tokenHash: string): Promise<ApiKeyRecord | null> {
+    for (const record of this.state.apiKeys.values()) {
+      if (record.tokenHash === tokenHash) {
+        return cloneJson(record);
+      }
+    }
+    return null;
+  }
+
+  async listApiKeys(workspaceId: UUID): Promise<ApiKeyRecord[]> {
+    const result: ApiKeyRecord[] = [];
+    for (const record of this.state.apiKeys.values()) {
+      if (record.workspaceId === workspaceId) {
+        result.push(cloneJson(record));
+      }
+    }
+    return result;
+  }
+
+  async revokeApiKey(id: UUID, workspaceId: UUID): Promise<boolean> {
+    const record = this.state.apiKeys.get(id);
+    if (!record || record.workspaceId !== workspaceId || record.revokedAt !== null) {
+      return false;
+    }
+    record.revokedAt = now();
+    return true;
+  }
+
+  async touchApiKeyLastUsed(id: UUID): Promise<void> {
+    const record = this.state.apiKeys.get(id);
+    if (record) {
+      record.lastUsedAt = now();
+    }
+  }
+
   // ---- collections & views ------------------------------------------------
 
   async findCollectionById(id: UUID): Promise<CollectionRecord | null> {
@@ -402,6 +514,190 @@ export class InMemoryStore implements DataStore {
     };
     this.state.collectionViews.set(view.id, view);
     return cloneJson(view);
+  }
+
+  async listCollectionsBySpace(spaceId: UUID): Promise<CollectionRecord[]> {
+    const result: CollectionRecord[] = [];
+    for (const collection of this.state.collections.values()) {
+      if (collection.spaceId === spaceId && collection.alive) {
+        result.push(cloneJson(collection));
+      }
+    }
+    return result;
+  }
+
+  async updateCollection(
+    id: UUID,
+    patch: Partial<Pick<CollectionRecord, 'name' | 'description' | 'schema' | 'alive'>>,
+  ): Promise<CollectionRecord | null> {
+    const collection = this.state.collections.get(id);
+    if (!collection) {
+      return null;
+    }
+    if (patch.name !== undefined) collection.name = cloneJson(patch.name);
+    if (patch.description !== undefined) {
+      collection.description = cloneJson(patch.description);
+    }
+    if (patch.schema !== undefined) collection.schema = cloneJson(patch.schema);
+    if (patch.alive !== undefined) collection.alive = patch.alive;
+    collection.version += 1;
+    collection.updatedAt = now();
+    return cloneJson(collection);
+  }
+
+  // ---- webhook subscriptions ----------------------------------------------
+
+  async createWebhookSubscription(
+    input: NewWebhookSubscription,
+  ): Promise<WebhookSubscriptionRecord> {
+    const timestamp = now();
+    const record: WebhookSubscriptionRecord = {
+      id: input.id ?? randomUUID(),
+      workspaceId: input.workspaceId,
+      url: input.url,
+      secret: input.secret,
+      events: [...(input.events ?? [])],
+      alive: true,
+      createdById: input.createdById ?? null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    this.state.webhookSubscriptions.set(record.id, record);
+    return cloneJson(record);
+  }
+
+  async findWebhookSubscriptionById(id: UUID): Promise<WebhookSubscriptionRecord | null> {
+    const record = this.state.webhookSubscriptions.get(id);
+    return record ? cloneJson(record) : null;
+  }
+
+  async listWebhookSubscriptions(workspaceId: UUID): Promise<WebhookSubscriptionRecord[]> {
+    const result: WebhookSubscriptionRecord[] = [];
+    for (const record of this.state.webhookSubscriptions.values()) {
+      if (record.workspaceId === workspaceId) {
+        result.push(cloneJson(record));
+      }
+    }
+    return result;
+  }
+
+  async listActiveWebhookSubscriptions(
+    workspaceId: UUID,
+    events?: string[],
+  ): Promise<WebhookSubscriptionRecord[]> {
+    const result: WebhookSubscriptionRecord[] = [];
+    for (const record of this.state.webhookSubscriptions.values()) {
+      if (record.workspaceId !== workspaceId || !record.alive) {
+        continue;
+      }
+      if (
+        events !== undefined &&
+        events.length > 0 &&
+        !events.some((event) => record.events.includes(event))
+      ) {
+        continue;
+      }
+      result.push(cloneJson(record));
+    }
+    return result;
+  }
+
+  async deleteWebhookSubscription(id: UUID, workspaceId: UUID): Promise<boolean> {
+    const record = this.state.webhookSubscriptions.get(id);
+    if (!record || record.workspaceId !== workspaceId) {
+      return false;
+    }
+    record.alive = false;
+    record.updatedAt = now();
+    return true;
+  }
+
+  async createWebhookDelivery(input: NewWebhookDelivery): Promise<WebhookDeliveryRecord> {
+    const record: WebhookDeliveryRecord = {
+      id: input.id ?? randomUUID(),
+      subscriptionId: input.subscriptionId,
+      event: input.event,
+      payload: cloneJson(input.payload),
+      signature: input.signature,
+      attempts: input.attempts,
+      responseStatus: input.responseStatus ?? null,
+      error: input.error ?? null,
+      createdAt: now(),
+    };
+    this.state.webhookDeliveries.set(record.id, record);
+    return cloneJson(record);
+  }
+
+  async listWebhookDeliveries(subscriptionId: UUID): Promise<WebhookDeliveryRecord[]> {
+    const result: WebhookDeliveryRecord[] = [];
+    for (const record of this.state.webhookDeliveries.values()) {
+      if (record.subscriptionId === subscriptionId) {
+        result.push(cloneJson(record));
+      }
+    }
+    return result;
+  }
+
+  // ---- automation rules ---------------------------------------------------
+
+  async createAutomationRule(input: NewAutomationRule): Promise<AutomationRuleRecord> {
+    const timestamp = now();
+    const record: AutomationRuleRecord = {
+      id: input.id ?? randomUUID(),
+      workspaceId: input.workspaceId,
+      name: input.name,
+      description: input.description ?? null,
+      trigger: cloneJson(input.trigger),
+      actions: cloneJson(input.actions),
+      alive: true,
+      createdById: input.createdById ?? null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    this.state.automationRules.set(record.id, record);
+    return cloneJson(record);
+  }
+
+  async findAutomationRuleById(id: UUID): Promise<AutomationRuleRecord | null> {
+    const record = this.state.automationRules.get(id);
+    return record ? cloneJson(record) : null;
+  }
+
+  async listAutomationRules(workspaceId: UUID): Promise<AutomationRuleRecord[]> {
+    const result: AutomationRuleRecord[] = [];
+    for (const record of this.state.automationRules.values()) {
+      if (record.workspaceId === workspaceId) {
+        result.push(cloneJson(record));
+      }
+    }
+    return result;
+  }
+
+  async listActiveAutomationRules(
+    workspaceId: UUID,
+    triggerType?: string,
+  ): Promise<AutomationRuleRecord[]> {
+    const result: AutomationRuleRecord[] = [];
+    for (const record of this.state.automationRules.values()) {
+      if (record.workspaceId !== workspaceId || !record.alive) {
+        continue;
+      }
+      if (triggerType !== undefined && record.trigger.type !== triggerType) {
+        continue;
+      }
+      result.push(cloneJson(record));
+    }
+    return result;
+  }
+
+  async deleteAutomationRule(id: UUID, workspaceId: UUID): Promise<boolean> {
+    const record = this.state.automationRules.get(id);
+    if (!record || record.workspaceId !== workspaceId) {
+      return false;
+    }
+    record.alive = false;
+    record.updatedAt = now();
+    return true;
   }
 
   // ---- transactions (atomic) ----------------------------------------------

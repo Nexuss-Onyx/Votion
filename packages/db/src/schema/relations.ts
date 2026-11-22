@@ -7,11 +7,14 @@
 
 import { relations } from 'drizzle-orm';
 
+import { apiKeys } from './api_keys.js';
+import { automationRules } from './automations.js';
 import { blocks } from './blocks.js';
 import { collectionViews, collections } from './collections.js';
 import { permissions } from './permissions.js';
 import { transactionRecords } from './transactions.js';
 import { accounts, users } from './users.js';
+import { webhookDeliveries, webhookSubscriptions } from './webhooks.js';
 import { workspaceMembers, workspaces } from './workspaces.js';
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -36,6 +39,9 @@ export const workspacesRelations = relations(workspaces, ({ many }) => ({
   collectionViews: many(collectionViews),
   permissions: many(permissions),
   transactions: many(transactionRecords),
+  apiKeys: many(apiKeys),
+  webhookSubscriptions: many(webhookSubscriptions),
+  automationRules: many(automationRules),
 }));
 
 export const workspaceMembersRelations = relations(workspaceMembers, ({ one }) => ({
@@ -105,3 +111,46 @@ export const transactionRecordsRelations = relations(
     }),
   }),
 );
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [apiKeys.workspaceId],
+    references: [workspaces.id],
+  }),
+  createdBy: one(users, {
+    fields: [apiKeys.createdById],
+    references: [users.id],
+  }),
+}));
+
+export const webhookSubscriptionsRelations = relations(
+  webhookSubscriptions,
+  ({ one, many }) => ({
+    workspace: one(workspaces, {
+      fields: [webhookSubscriptions.workspaceId],
+      references: [workspaces.id],
+    }),
+    deliveries: many(webhookDeliveries),
+  }),
+);
+
+export const webhookDeliveriesRelations = relations(
+  webhookDeliveries,
+  ({ one }) => ({
+    subscription: one(webhookSubscriptions, {
+      fields: [webhookDeliveries.subscriptionId],
+      references: [webhookSubscriptions.id],
+    }),
+  }),
+);
+
+export const automationRulesRelations = relations(automationRules, ({ one }) => ({
+  workspace: one(workspaces, {
+    fields: [automationRules.workspaceId],
+    references: [workspaces.id],
+  }),
+  createdBy: one(users, {
+    fields: [automationRules.createdById],
+    references: [users.id],
+  }),
+}));

@@ -12,4 +12,7 @@ export * from './blocks.js';
 export * from './collections.js';
 export * from './permissions.js';
 export * from './transactions.js';
+export * from './api_keys.js';
+export * from './webhooks.js';
+export * from './automations.js';
 export * from './relations.js';

@@ -16,15 +16,19 @@
 
 import { randomUUID } from 'node:crypto';
 
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull } from 'drizzle-orm';
 
 import {
+  apiKeys,
+  automationRules,
   blocks,
   collectionViews,
   collections,
   createDatabase,
   transactionRecords,
   users,
+  webhookDeliveries,
+  webhookSubscriptions,
   workspaceMembers,
   workspaces,
   type DatabaseHandle,
@@ -34,19 +38,28 @@ import type { Transaction, UUID, WorkspaceRole } from '@votion/types';
 
 import { OperationError, applyOperation, cloneJson } from '../lib/jsonpatch.js';
 import type {
+  ApiKeyRecord,
   AppliedTransaction,
+  AutomationRuleRecord,
+  BlockPatch,
   BlockRecord,
   CollectionRecord,
   CollectionViewRecord,
   DataStore,
+  NewApiKey,
+  NewAutomationRule,
   NewBlock,
   NewCollection,
   NewCollectionView,
   NewUser,
+  NewWebhookDelivery,
+  NewWebhookSubscription,
   NewWorkspace,
   RefreshTokenRecord,
   TransactionRecordRow,
   UserRecord,
+  WebhookDeliveryRecord,
+  WebhookSubscriptionRecord,
   WorkspaceMemberRecord,
   WorkspaceRecord,
 } from './types.js';
@@ -58,6 +71,10 @@ type CollectionRow = typeof collections.$inferSelect;
 type CollectionViewRow = typeof collectionViews.$inferSelect;
 type UserRow = typeof users.$inferSelect;
 type WorkspaceRow = typeof workspaces.$inferSelect;
+type ApiKeyRow = typeof apiKeys.$inferSelect;
+type WebhookSubscriptionRow = typeof webhookSubscriptions.$inferSelect;
+type WebhookDeliveryRow = typeof webhookDeliveries.$inferSelect;
+type AutomationRuleRow = typeof automationRules.$inferSelect;
 
 function toBlockRecord(row: BlockRow): BlockRecord {
   return {
@@ -133,6 +150,65 @@ function toWorkspaceRecord(row: WorkspaceRow): WorkspaceRecord {
     icon: row.icon,
     plan: row.plan,
     settings: cloneJson(row.settings),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function toApiKeyRecord(row: ApiKeyRow): ApiKeyRecord {
+  return {
+    id: row.id,
+    workspaceId: row.workspaceId,
+    name: row.name,
+    tokenHash: row.tokenHash,
+    tokenPrefix: row.tokenPrefix,
+    capabilities: [...row.capabilities],
+    createdById: row.createdById,
+    lastUsedAt: row.lastUsedAt,
+    expiresAt: row.expiresAt,
+    revokedAt: row.revokedAt,
+    createdAt: row.createdAt,
+  };
+}
+
+function toWebhookSubscriptionRecord(row: WebhookSubscriptionRow): WebhookSubscriptionRecord {
+  return {
+    id: row.id,
+    workspaceId: row.workspaceId,
+    url: row.url,
+    secret: row.secret,
+    events: [...row.events],
+    alive: row.alive,
+    createdById: row.createdById,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function toWebhookDeliveryRecord(row: WebhookDeliveryRow): WebhookDeliveryRecord {
+  return {
+    id: row.id,
+    subscriptionId: row.subscriptionId,
+    event: row.event,
+    payload: cloneJson(row.payload),
+    signature: row.signature,
+    attempts: row.attempts,
+    responseStatus: row.responseStatus,
+    error: row.error,
+    createdAt: row.createdAt,
+  };
+}
+
+function toAutomationRuleRecord(row: AutomationRuleRow): AutomationRuleRecord {
+  return {
+    id: row.id,
+    workspaceId: row.workspaceId,
+    name: row.name,
+    description: row.description,
+    trigger: cloneJson(row.trigger) as unknown as AutomationRuleRecord['trigger'],
+    actions: cloneJson(row.actions) as unknown as AutomationRuleRecord['actions'],
+    alive: row.alive,
+    createdById: row.createdById,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -442,6 +518,107 @@ export class PostgresStore implements DataStore {
     return rows.map(toBlockRecord);
   }
 
+  async listBlocksBySpace(spaceId: UUID): Promise<BlockRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(blocks)
+      .where(and(eq(blocks.spaceId, spaceId), eq(blocks.alive, true)));
+    return rows.map(toBlockRecord);
+  }
+
+  async updateBlock(
+    id: UUID,
+    patch: BlockPatch,
+    editedById?: UUID | null,
+  ): Promise<BlockRecord | null> {
+    const existing = await this.db.select().from(blocks).where(eq(blocks.id, id)).limit(1);
+    const row = existing[0];
+    if (!row) {
+      return null;
+    }
+    const set: Partial<BlockRow> = {
+      version: row.version + 1,
+      lastEditedTime: new Date(),
+      lastEditedById: editedById === undefined ? row.lastEditedById : editedById,
+    };
+    if (patch.properties !== undefined) {
+      set.properties = { ...cloneJson(row.properties), ...cloneJson(patch.properties) };
+    }
+    if (patch.format !== undefined) {
+      set.format = { ...cloneJson(row.format), ...cloneJson(patch.format) };
+    }
+    if (patch.content !== undefined) {
+      set.content = [...patch.content];
+    }
+    if (patch.alive !== undefined) {
+      set.alive = patch.alive;
+    }
+    const rows = await this.db
+      .update(blocks)
+      .set(set)
+      .where(eq(blocks.id, id))
+      .returning();
+    return rows[0] ? toBlockRecord(rows[0]) : null;
+  }
+
+  // ---- integration tokens -------------------------------------------------
+
+  async createApiKey(input: NewApiKey): Promise<ApiKeyRecord> {
+    const rows = await this.db
+      .insert(apiKeys)
+      .values({
+        id: input.id,
+        workspaceId: input.workspaceId,
+        name: input.name,
+        tokenHash: input.tokenHash,
+        tokenPrefix: input.tokenPrefix,
+        capabilities: [...(input.capabilities ?? [])] as ApiKeyRow['capabilities'],
+        createdById: input.createdById ?? null,
+        expiresAt: input.expiresAt ?? null,
+      })
+      .returning();
+    const row = rows[0];
+    if (!row) {
+      throw new Error('Failed to create API key.');
+    }
+    return toApiKeyRecord(row);
+  }
+
+  async findApiKeyByTokenHash(tokenHash: string): Promise<ApiKeyRecord | null> {
+    const rows = await this.db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.tokenHash, tokenHash))
+      .limit(1);
+    return rows[0] ? toApiKeyRecord(rows[0]) : null;
+  }
+
+  async listApiKeys(workspaceId: UUID): Promise<ApiKeyRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.workspaceId, workspaceId));
+    return rows.map(toApiKeyRecord);
+  }
+
+  async revokeApiKey(id: UUID, workspaceId: UUID): Promise<boolean> {
+    const rows = await this.db
+      .update(apiKeys)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(eq(apiKeys.id, id), eq(apiKeys.workspaceId, workspaceId), isNull(apiKeys.revokedAt)),
+      )
+      .returning();
+    return rows.length > 0;
+  }
+
+  async touchApiKeyLastUsed(id: UUID): Promise<void> {
+    await this.db
+      .update(apiKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(apiKeys.id, id));
+  }
+
   // ---- collections & views ------------------------------------------------
 
   async findCollectionById(id: UUID): Promise<CollectionRecord | null> {
@@ -531,6 +708,216 @@ export class PostgresStore implements DataStore {
       throw new Error('Failed to create collection view.');
     }
     return toCollectionViewRecord(row);
+  }
+
+  async listCollectionsBySpace(spaceId: UUID): Promise<CollectionRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(collections)
+      .where(and(eq(collections.spaceId, spaceId), eq(collections.alive, true)));
+    return rows.map(toCollectionRecord);
+  }
+
+  async updateCollection(
+    id: UUID,
+    patch: Partial<Pick<CollectionRecord, 'name' | 'description' | 'schema' | 'alive'>>,
+  ): Promise<CollectionRecord | null> {
+    const set: Partial<CollectionRow> = { updatedAt: new Date() };
+    if (patch.name !== undefined) set.name = cloneJson(patch.name);
+    if (patch.description !== undefined) set.description = cloneJson(patch.description);
+    if (patch.schema !== undefined) set.schema = cloneJson(patch.schema);
+    if (patch.alive !== undefined) set.alive = patch.alive;
+    const existing = await this.db
+      .select({ version: collections.version })
+      .from(collections)
+      .where(eq(collections.id, id))
+      .limit(1);
+    if (!existing[0]) {
+      return null;
+    }
+    set.version = existing[0].version + 1;
+    const rows = await this.db
+      .update(collections)
+      .set(set)
+      .where(eq(collections.id, id))
+      .returning();
+    return rows[0] ? toCollectionRecord(rows[0]) : null;
+  }
+
+  // ---- webhook subscriptions ----------------------------------------------
+
+  async createWebhookSubscription(
+    input: NewWebhookSubscription,
+  ): Promise<WebhookSubscriptionRecord> {
+    const rows = await this.db
+      .insert(webhookSubscriptions)
+      .values({
+        id: input.id,
+        workspaceId: input.workspaceId,
+        url: input.url,
+        secret: input.secret,
+        events: [...(input.events ?? [])],
+        createdById: input.createdById ?? null,
+      })
+      .returning();
+    const row = rows[0];
+    if (!row) {
+      throw new Error('Failed to create webhook subscription.');
+    }
+    return toWebhookSubscriptionRecord(row);
+  }
+
+  async findWebhookSubscriptionById(id: UUID): Promise<WebhookSubscriptionRecord | null> {
+    const rows = await this.db
+      .select()
+      .from(webhookSubscriptions)
+      .where(eq(webhookSubscriptions.id, id))
+      .limit(1);
+    return rows[0] ? toWebhookSubscriptionRecord(rows[0]) : null;
+  }
+
+  async listWebhookSubscriptions(workspaceId: UUID): Promise<WebhookSubscriptionRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(webhookSubscriptions)
+      .where(eq(webhookSubscriptions.workspaceId, workspaceId));
+    return rows.map(toWebhookSubscriptionRecord);
+  }
+
+  async listActiveWebhookSubscriptions(
+    workspaceId: UUID,
+    events?: string[],
+  ): Promise<WebhookSubscriptionRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(webhookSubscriptions)
+      .where(
+        and(
+          eq(webhookSubscriptions.workspaceId, workspaceId),
+          eq(webhookSubscriptions.alive, true),
+        ),
+      );
+    const filtered = events && events.length > 0
+      ? rows.filter((row) => events.some((event) => row.events.includes(event)))
+      : rows;
+    return filtered.map(toWebhookSubscriptionRecord);
+  }
+
+  async deleteWebhookSubscription(id: UUID, workspaceId: UUID): Promise<boolean> {
+    const rows = await this.db
+      .update(webhookSubscriptions)
+      .set({ alive: false, updatedAt: new Date() })
+      .where(
+        and(
+          eq(webhookSubscriptions.id, id),
+          eq(webhookSubscriptions.workspaceId, workspaceId),
+        ),
+      )
+      .returning();
+    return rows.length > 0;
+  }
+
+  async createWebhookDelivery(input: NewWebhookDelivery): Promise<WebhookDeliveryRecord> {
+    const rows = await this.db
+      .insert(webhookDeliveries)
+      .values({
+        id: input.id,
+        subscriptionId: input.subscriptionId,
+        event: input.event,
+        payload: cloneJson(input.payload),
+        signature: input.signature,
+        attempts: input.attempts,
+        responseStatus: input.responseStatus ?? null,
+        error: input.error ?? null,
+      })
+      .returning();
+    const row = rows[0];
+    if (!row) {
+      throw new Error('Failed to record webhook delivery.');
+    }
+    return toWebhookDeliveryRecord(row);
+  }
+
+  async listWebhookDeliveries(subscriptionId: UUID): Promise<WebhookDeliveryRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(webhookDeliveries)
+      .where(eq(webhookDeliveries.subscriptionId, subscriptionId))
+      .orderBy(asc(webhookDeliveries.createdAt));
+    return rows.map(toWebhookDeliveryRecord);
+  }
+
+  // ---- automation rules ---------------------------------------------------
+
+  async createAutomationRule(input: NewAutomationRule): Promise<AutomationRuleRecord> {
+    const rows = await this.db
+      .insert(automationRules)
+      .values({
+        id: input.id,
+        workspaceId: input.workspaceId,
+        name: input.name,
+        description: input.description ?? null,
+        trigger: cloneJson(input.trigger) as unknown as Record<string, unknown>,
+        actions: cloneJson(input.actions) as unknown as Record<string, unknown>[],
+        createdById: input.createdById ?? null,
+      })
+      .returning();
+    const row = rows[0];
+    if (!row) {
+      throw new Error('Failed to create automation rule.');
+    }
+    return toAutomationRuleRecord(row);
+  }
+
+  async findAutomationRuleById(id: UUID): Promise<AutomationRuleRecord | null> {
+    const rows = await this.db
+      .select()
+      .from(automationRules)
+      .where(eq(automationRules.id, id))
+      .limit(1);
+    return rows[0] ? toAutomationRuleRecord(rows[0]) : null;
+  }
+
+  async listAutomationRules(workspaceId: UUID): Promise<AutomationRuleRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(automationRules)
+      .where(eq(automationRules.workspaceId, workspaceId));
+    return rows.map(toAutomationRuleRecord);
+  }
+
+  async listActiveAutomationRules(
+    workspaceId: UUID,
+    triggerType?: string,
+  ): Promise<AutomationRuleRecord[]> {
+    const rows = await this.db
+      .select()
+      .from(automationRules)
+      .where(
+        and(
+          eq(automationRules.workspaceId, workspaceId),
+          eq(automationRules.alive, true),
+        ),
+      );
+    const filtered =
+      triggerType !== undefined
+        ? rows.filter((row) => (row.trigger as { type?: string }).type === triggerType)
+        : rows;
+    return filtered.map(toAutomationRuleRecord);
+  }
+
+  async deleteAutomationRule(id: UUID, workspaceId: UUID): Promise<boolean> {
+    const rows = await this.db
+      .update(automationRules)
+      .set({ alive: false, updatedAt: new Date() })
+      .where(
+        and(
+          eq(automationRules.id, id),
+          eq(automationRules.workspaceId, workspaceId),
+        ),
+      )
+      .returning();
+    return rows.length > 0;
   }
 
   // ---- transactions (atomic) ----------------------------------------------

@@ -17,6 +17,9 @@
     "test:auth": "vitest run test/auth.test.ts",
     "test:transactions": "vitest run test/transactions.test.ts",
     "test:records": "vitest run test/records.test.ts test/assets.test.ts test/workspaces.test.ts",
+    "test:api-v1": "vitest run test/api-v1.test.ts",
+    "test:webhooks": "vitest run test/webhooks.test.ts",
+    "test:automations": "vitest run test/automations.test.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

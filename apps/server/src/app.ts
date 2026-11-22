@@ -10,11 +10,16 @@ import { loadConfig, type ServerConfig } from './config.js';
 import authPlugin from './plugins/auth.js';
 import { createPublisher, type EventPublisher } from './lib/redis.js';
 import { createUploadSigner, type UploadSigner } from './lib/s3.js';
+import { apiKeyRoutes } from './routes/apiKeys.js';
 import { assetRoutes } from './routes/assets.js';
 import { authRoutes } from './routes/auth.js';
 import { recordRoutes } from './routes/records.js';
 import { transactionRoutes } from './routes/transactions.js';
 import { workspaceRoutes } from './routes/workspaces.js';
+import { v1Routes } from './api/v1/index.js';
+import { AutomationEngine } from './api/v1/automations/engine.js';
+import { V1EventManager } from './api/v1/events.js';
+import { WebhookDispatcher } from './api/v1/webhooks/dispatcher.js';
 import { createStore } from './store/index.js';
 import type { DataStore } from './store/types.js';
 
@@ -23,6 +28,12 @@ export interface BuildServerOptions {
   store?: DataStore;
   publisher?: EventPublisher;
   uploadSigner?: UploadSigner;
+  /** Overrides the HMAC webhook dispatcher (tests). */
+  webhookDispatcher?: WebhookDispatcher;
+  /** Overrides the automation engine (tests). */
+  automationEngine?: AutomationEngine;
+  /** Overrides the webhook/automation fan-out coordinator (tests). */
+  v1Events?: V1EventManager;
   logger?: boolean;
 }
 
@@ -34,10 +45,27 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Fas
     trustProxy: true,
     bodyLimit: 2 * 1024 * 1024,
   });
+  const store = options.store ?? createStore(config);
+  const dispatcher =
+    options.webhookDispatcher ??
+    new WebhookDispatcher(store, {
+      logger: {
+        error: (message, meta) => fastify.log.error(meta ?? {}, message),
+      },
+    });
+  const automationEngine =
+    options.automationEngine ??
+    new AutomationEngine(store, { dispatcher });
   fastify.decorate('config', config);
-  fastify.decorate('store', options.store ?? createStore(config));
+  fastify.decorate('store', store);
   fastify.decorate('publisher', options.publisher ?? createPublisher(config));
   fastify.decorate('uploadSigner', options.uploadSigner ?? createUploadSigner(config));
+  fastify.decorate('webhookDispatcher', dispatcher);
+  fastify.decorate('automationEngine', automationEngine);
+  fastify.decorate(
+    'v1Events',
+    options.v1Events ?? new V1EventManager(dispatcher, automationEngine),
+  );
 
   await fastify.register(cors, {
     origin: config.CORS_ORIGIN === '*' ? true : config.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
@@ -52,10 +80,12 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Fas
   });
   await fastify.register(authPlugin);
   await fastify.register(authRoutes);
+  await fastify.register(apiKeyRoutes);
   await fastify.register(transactionRoutes);
   await fastify.register(recordRoutes);
   await fastify.register(assetRoutes);
   await fastify.register(workspaceRoutes);
+  await fastify.register(v1Routes, { prefix: '/v1' });
 
   fastify.get('/health', async () => ({ ok: true, service: 'votion-server' }));
 

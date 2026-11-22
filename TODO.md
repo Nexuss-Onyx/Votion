@@ -21,7 +21,7 @@
 | **Phase 8: Search & Discovery Engine** | `@votion/search` | ✅ Completed | 7 / 7 |
 | **Phase 9: Background Worker Fleet** | `apps/task-worker` | ✅ Completed | 11 / 11 |
 | **Phase 10: Web Application Shell** | `apps/web` | ⬜ Not Started | 0 / 16 |
-| **Phase 11: Developer API & Webhooks** | `apps/server/v1` | ⬜ Not Started | 0 / 8 |
+| **Phase 11: Developer API & Webhooks** | `apps/server/v1` | ✅ Completed | 8 / 8 |
 | **Phase 12: Wasmer Edge Deployment** | `wasmer.toml`, Wasmer CLI | ⬜ Not Started | 0 / 8 |
 
 ---
@@ -336,18 +336,24 @@
 
 ## Phase 11: Developer API & Automations (`apps/server/v1`)
 
-- [ ] Implement REST API conforming to Notion OpenAPI specification:
-  - [ ] `GET /v1/blocks/:id`, `PATCH /v1/blocks/:id`, `DELETE /v1/blocks/:id`
-  - [ ] `GET /v1/blocks/:id/children`, `PATCH /v1/blocks/:id/children`
-  - [ ] `POST /v1/pages`, `GET /v1/pages/:id`, `PATCH /v1/pages/:id`
-  - [ ] `POST /v1/databases`, `GET /v1/databases/:id`, `POST /v1/databases/:id/query`
-  - [ ] `POST /v1/search`
-- [ ] Implement API Key management (Internal integration tokens).
-- [ ] Build Webhook Dispatcher:
-  - [ ] Emit signed HTTP requests on database mutations with retry backoff.
-- [ ] Implement In-Database Automations:
-  - [ ] Triggers: `Page added`, `Property edited`.
-  - [ ] Actions: `Update property`, `Add page`, `Send webhook`.
+- [x] Implement REST API conforming to Notion OpenAPI specification:
+  - [x] `GET /v1/blocks/:id`, `PATCH /v1/blocks/:id`, `DELETE /v1/blocks/:id`
+  - [x] `GET /v1/blocks/:id/children`, `PATCH /v1/blocks/:id/children`
+  - [x] `POST /v1/pages`, `GET /v1/pages/:id`, `PATCH /v1/pages/:id`, `DELETE /v1/pages/:id`
+  - [x] `POST /v1/databases`, `GET /v1/databases/:id`, `PATCH /v1/databases/:id`, `POST /v1/databases/:id/query`
+  - [x] `POST /v1/search`
+- [x] Implement API Key management (Internal integration tokens):
+  - [x] `api_keys` table storing SHA-256 token digests + capability scopes.
+  - [x] `Authorization: Bearer secret_...` middleware attaching workspace/bot capabilities.
+  - [x] `POST /v1/api-keys`, `GET /v1/api-keys`, `DELETE /v1/api-keys/:id`.
+- [x] Build Webhook Dispatcher:
+  - [x] Emit signed HTTP requests on database mutations with retry backoff.
+  - [x] HMAC-SHA256 `X-Votion-Signature` header and `webhook_deliveries` audit log.
+  - [x] `POST /v1/webhooks`, `GET /v1/webhooks`, `DELETE /v1/webhooks/:id`.
+- [x] Implement In-Database Automations:
+  - [x] Triggers: `Page added`, `Property edited`.
+  - [x] Actions: `Update property`, `Add page`, `Send webhook`.
+  - [x] `POST /v1/automations`, `GET /v1/automations`, `DELETE /v1/automations/:id`.
 
 ---
 
