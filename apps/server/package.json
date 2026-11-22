@@ -2,20 +2,47 @@
   "name": "@votion/server",
   "version": "0.1.0",
   "private": true,
-  "description": "Votion backend API & transaction server",
+  "description": "Votion backend API & transaction server (Fastify on Node.js / Wasmer Edge)",
   "author": "Nexuss-Onyx <tadd4212@gmail.com>",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test --ext .ts",
+    "test": "vitest run",
+    "test:auth": "vitest run test/auth.test.ts",
+    "test:transactions": "vitest run test/transactions.test.ts",
+    "test:records": "vitest run test/records.test.ts test/assets.test.ts test/workspaces.test.ts",
     "clean": "rm -rf dist"
   },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@aws-sdk/s3-request-presigner": "^3.758.0",
+    "@fastify/compress": "^8.0.0",
+    "@fastify/cors": "^10.0.1",
+    "@fastify/helmet": "^12.0.1",
+    "@fastify/jwt": "^9.0.1",
+    "@fastify/rate-limit": "^10.2.1",
+    "@votion/db": "workspace:*",
+    "@votion/types": "workspace:*",
+    "argon2": "^0.41.1",
+    "fastify": "^5.2.1",
+    "fastify-plugin": "^5.0.1",
+    "drizzle-orm": "^0.45.4",
+    "ioredis": "^5.4.2",
+    "zod": "^3.24.2"
+  },
   "devDependencies": {
+    "@types/node": "^22.10.2",
     "@votion/eslint-config": "workspace:*",
     "@votion/typescript-config": "workspace:*",
     "eslint": "^8.57.0",
-    "typescript": "^5.4.5"
+    "tsx": "^4.19.2",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
   }
 }

@@ -15,7 +15,7 @@
 | **Phase 2: Client State & Offline Engine**| `@votion/sync-client` | ✅ Completed | 10 / 10 |
 | **Phase 3: Block Editor & Canvas** | `@votion/editor` | ⬜ Not Started | 0 / 22 |
 | **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ⬜ Not Started | 0 / 20 |
-| **Phase 5: Backend API & Transactions** | `apps/server` | ⬜ Not Started | 0 / 14 |
+| **Phase 5: Backend API & Transactions** | `apps/server` | ✅ Completed | 14 / 14 |
 | **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ✅ Completed | 9 / 9 |
 | **Phase 7: Access Control & Permissions** | `@votion/acl` | ✅ Completed | 8 / 8 |
 | **Phase 8: Search & Discovery Engine** | `@votion/search` | ✅ Completed | 7 / 7 |
@@ -214,25 +214,25 @@
 
 ## Phase 5: Backend API & Transaction Server (`apps/server`)
 
-- [ ] Bootstrap Fastify server with CORS, Helmet, and Compression plugins.
-- [ ] Implement authentication & session management:
-  - [ ] User signup, login, password hashing (Argon2 / bcrypt).
-  - [ ] JWT issuance and refresh token rotation.
-- [ ] Implement `POST /api/v3/saveTransactions`:
-  - [ ] Validate request body and transaction schema.
-  - [ ] Verify user permission on target entity records.
-  - [ ] Execute PostgreSQL transaction applying operations (`set`, `update`, `listAfter`, etc.).
-  - [ ] Increment record versions and update audit fields.
-  - [ ] Append entry to `transaction_records` (WAL).
-  - [ ] Publish event to Redis channel `space:<space_id>:events`.
-- [ ] Implement `POST /api/v3/loadPageChunk`:
-  - [ ] Fetch root page block and recursively fetch all descendants up to depth limit.
-  - [ ] Return records normalized into `{ recordMap: { block, collection, collection_view } }`.
-- [ ] Implement `POST /api/v3/queryCollection`:
-  - [ ] Server-side execution of database queries, filters, and pagination.
-- [ ] Implement `POST /api/v3/getUploadFileUrl`:
-  - [ ] Generate Cloudflare R2 / AWS S3 presigned PUT URLs for client-side uploads.
-- [ ] Implement workspace and teamspace management endpoints.
+- [x] Bootstrap Fastify server with CORS, Helmet, and Compression plugins.
+- [x] Implement authentication & session management:
+  - [x] User signup, login, password hashing (Argon2 / bcrypt).
+  - [x] JWT issuance and refresh token rotation.
+- [x] Implement `POST /api/v3/saveTransactions`:
+  - [x] Validate request body and transaction schema.
+  - [x] Verify user permission on target entity records.
+  - [x] Execute PostgreSQL transaction applying operations (`set`, `update`, `listAfter`, etc.).
+  - [x] Increment record versions and update audit fields.
+  - [x] Append entry to `transaction_records` (WAL).
+  - [x] Publish event to Redis channel `space:<space_id>:events`.
+- [x] Implement `POST /api/v3/loadPageChunk`:
+  - [x] Fetch root page block and recursively fetch all descendants up to depth limit.
+  - [x] Return records normalized into `{ recordMap: { block, collection, collection_view } }`.
+- [x] Implement `POST /api/v3/queryCollection`:
+  - [x] Server-side execution of database queries, filters, and pagination.
+- [x] Implement `POST /api/v3/getUploadFileUrl`:
+  - [x] Generate Cloudflare R2 / AWS S3 presigned PUT URLs for client-side uploads.
+- [x] Implement workspace and teamspace management endpoints.
 
 ---
 
