@@ -1,0 +1,80 @@
+{
+  "name": "@votion/database-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Votion database & collection engine: schema registry, 6 view projections, compound filter/sort engine, Formula 2.0 AST evaluator and relation/rollup calculations",
+  "author": "Nexuss-Onyx <tadd4212@gmail.com>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./dist/schema/index.js"
+    },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "default": "./dist/query/index.js"
+    },
+    "./formula": {
+      "types": "./dist/formula/index.d.ts",
+      "default": "./dist/formula/index.js"
+    },
+    "./relation": {
+      "types": "./dist/relation/index.d.ts",
+      "default": "./dist/relation/index.js"
+    },
+    "./views": {
+      "types": "./dist/views/index.d.ts",
+      "default": "./dist/views/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm --filter @votion/types run build && pnpm --filter @votion/sync-client run build && tsc -p tsconfig.test.json --noEmit && vitest run",
+    "test:watch": "vitest",
+    "test:formula": "pnpm --filter @votion/types run build && pnpm --filter @votion/sync-client run build && vitest run test/formula.test.ts",
+    "test:query": "pnpm --filter @votion/types run build && pnpm --filter @votion/sync-client run build && vitest run test/query.test.ts",
+    "test:views": "pnpm --filter @votion/types run build && pnpm --filter @votion/sync-client run build && vitest run test/views.test.tsx",
+    "test:schema": "pnpm --filter @votion/types run build && pnpm --filter @votion/sync-client run build && vitest run test/schema.test.ts",
+    "test:relation": "pnpm --filter @votion/types run build && pnpm --filter @votion/sync-client run build && vitest run test/relation.test.ts",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.11.2",
+    "@votion/sync-client": "workspace:*",
+    "@votion/types": "workspace:*",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@votion/eslint-config": "workspace:*",
+    "@votion/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
+    "jsdom": "^25.0.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
+  }
+}

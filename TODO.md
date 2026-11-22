@@ -14,7 +14,7 @@
 | **Phase 1: Core Contracts & Database** | `@votion/types`, `@votion/db` | ✅ Completed | 12 / 12 |
 | **Phase 2: Client State & Offline Engine**| `@votion/sync-client` | ✅ Completed | 10 / 10 |
 | **Phase 3: Block Editor & Canvas** | `@votion/editor` | ✅ Completed | 22 / 22 |
-| **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ⬜ Not Started | 0 / 20 |
+| **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ✅ Completed | 20 / 20 |
 | **Phase 5: Backend API & Transactions** | `apps/server` | ✅ Completed | 14 / 14 |
 | **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ✅ Completed | 9 / 9 |
 | **Phase 7: Access Control & Permissions** | `@votion/acl` | ✅ Completed | 8 / 8 |
@@ -160,55 +160,55 @@
 ## Phase 4: Database & Collection Engine (`@votion/database-engine`)
 
 ### 4.1 Schema & Properties
-- [ ] Property Registry & Schema Manager:
-  - [ ] Primitive properties: Text, Number (format as currency/percent/progress), Select, Multi-select, Status, Date (with time & reminder), Checkbox, URL, Email, Phone.
-  - [ ] Audit properties: Created time, Created by, Last edited time, Last edited by, Unique ID.
-  - [ ] Add, rename, hide, duplicate, and delete properties in collection schema.
+- [x] Property Registry & Schema Manager:
+  - [x] Primitive properties: Text, Number (format as currency/percent/progress), Select, Multi-select, Status, Date (with time & reminder), Checkbox, URL, Email, Phone.
+  - [x] Audit properties: Created time, Created by, Last edited time, Last edited by, Unique ID.
+  - [x] Add, rename, hide, duplicate, and delete properties in collection schema.
 
 ### 4.2 Projections & Views
-- [ ] **Table View**:
-  - [ ] Virtualized spreadsheet grid.
-  - [ ] Draggable, resizable column headers.
-  - [ ] In-cell editing for all property types.
-  - [ ] Footer aggregations (Sum, Avg, Min, Max, Count).
-- [ ] **Board View (Kanban)**:
-  - [ ] Column groupings by Select, Status, or Date.
-  - [ ] Drag-and-drop card movement between columns (updates record property).
-  - [ ] Collapsible board columns and swimlanes.
-- [ ] **Calendar View**:
-  - [ ] Month and week grid projections based on Date property.
-  - [ ] Drag-and-drop rescheduling.
-- [ ] **Timeline View (Gantt)**:
-  - [ ] Visual duration bars based on Date ranges (start/end).
-  - [ ] Zoom scale controller (hours, days, weeks, months).
-  - [ ] Dependency lines connecting related cards.
-- [ ] **Gallery View**:
-  - [ ] Responsive card grid.
-  - [ ] Card cover picker (Page cover, Content preview, Custom file).
-- [ ] **List View**:
-  - [ ] High-density document list view with toggleable visible properties.
+- [x] **Table View**:
+  - [x] Virtualized spreadsheet grid.
+  - [x] Draggable, resizable column headers.
+  - [x] In-cell editing for all property types.
+  - [x] Footer aggregations (Sum, Avg, Min, Max, Count).
+- [x] **Board View (Kanban)**:
+  - [x] Column groupings by Select, Status, or Date.
+  - [x] Drag-and-drop card movement between columns (updates record property).
+  - [x] Collapsible board columns and swimlanes.
+- [x] **Calendar View**:
+  - [x] Month and week grid projections based on Date property.
+  - [x] Drag-and-drop rescheduling.
+- [x] **Timeline View (Gantt)**:
+  - [x] Visual duration bars based on Date ranges (start/end).
+  - [x] Zoom scale controller (hours, days, weeks, months).
+  - [x] Dependency lines connecting related cards.
+- [x] **Gallery View**:
+  - [x] Responsive card grid.
+  - [x] Card cover picker (Page cover, Content preview, Custom file).
+- [x] **List View**:
+  - [x] High-density document list view with toggleable visible properties.
 
 ### 4.3 Query, Filter & Sort Engine
-- [ ] Build recursive `FilterEvaluator`:
-  - [ ] Compound `AND` / `OR` clause tree.
-  - [ ] Type-specific operators (`equals`, `contains`, `is_empty`, `greater_than`, `is_checked`).
-- [ ] Build `SortEngine`:
-  - [ ] Multi-level ascending/descending property sorts.
-- [ ] Implement Grouping Engine (group records into sections with counts).
-- [ ] Implement Sub-Items (parent-child nested hierarchy within databases).
+- [x] Build recursive `FilterEvaluator`:
+  - [x] Compound `AND` / `OR` clause tree.
+  - [x] Type-specific operators (`equals`, `contains`, `is_empty`, `greater_than`, `is_checked`).
+- [x] Build `SortEngine`:
+  - [x] Multi-level ascending/descending property sorts.
+- [x] Implement Grouping Engine (group records into sections with counts).
+- [x] Implement Sub-Items (parent-child nested hierarchy within databases).
 
 ### 4.4 Formulas & Relational Graph
-- [ ] Build **Formula 2.0 Engine**:
-  - [ ] Lexer & Tokenizer.
-  - [ ] Recursive Descent Parser producing AST.
-  - [ ] AST Evaluator with runtime type checking.
-  - [ ] Standard library functions (math, string manipulation, date math, list `map`/`filter`).
-- [ ] Implement **Relation Properties**:
-  - [ ] Two-way foreign key linking between collections.
-  - [ ] Linked record picker modal.
-- [ ] Implement **Rollup Engine**:
-  - [ ] Look through Relation to target property.
-  - [ ] Execute aggregation function (`Count all`, `Sum`, `Average`, `Percent checked`).
+- [x] Build **Formula 2.0 Engine**:
+  - [x] Lexer & Tokenizer.
+  - [x] Recursive Descent Parser producing AST.
+  - [x] AST Evaluator with runtime type checking.
+  - [x] Standard library functions (math, string manipulation, date math, list `map`/`filter`).
+- [x] Implement **Relation Properties**:
+  - [x] Two-way foreign key linking between collections.
+  - [x] Linked record picker modal.
+- [x] Implement **Rollup Engine**:
+  - [x] Look through Relation to target property.
+  - [x] Execute aggregation function (`Count all`, `Sum`, `Average`, `Percent checked`).
 
 ---
 
