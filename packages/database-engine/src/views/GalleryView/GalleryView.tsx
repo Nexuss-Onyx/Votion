@@ -2,7 +2,7 @@
  * Gallery view: responsive card grid with cover images and property tags.
  */
 
-import type { JSX } from 'react';
+import { useState, type JSX } from 'react';
 import type { CardSize, CollectionSchema } from '@votion/types';
 import { formatPropertyValue } from '../../schema/PropertyRegistry.js';
 import type { DatabaseRecord } from '../../types.js';
@@ -64,7 +64,9 @@ export function GalleryView({
 }: DatabaseViewProps): JSX.Element {
   const schema = collection.schema;
   const rows = useViewRecords(records, view, schema);
-  const coverSource = view.format.gallery_cover ?? 'cover';
+  const [coverSource, setCoverSource] = useState<'cover' | 'content' | 'none'>(
+    view.format.gallery_cover ?? 'cover',
+  );
   const cardSize = view.format.gallery_card_size ?? view.format.gallery_cover_size ?? 'medium';
   const cardWidth = CARD_WIDTH[cardSize] ?? CARD_WIDTH.medium;
   const tagPropertyIds = viewCardProperties(view, schema, 3);
@@ -75,6 +77,23 @@ export function GalleryView({
       aria-label={`${view.name} gallery`}
       style={{ padding: 8, overflowY: 'auto', height: '100%' }}
     >
+      <div
+        className="votion-gallery-toolbar"
+        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}
+      >
+        <span style={{ fontSize: 12, color: '#6b6b6b' }}>Cover</span>
+        {(['cover', 'content', 'none'] as const).map((source) => (
+          <button
+            key={source}
+            type="button"
+            aria-pressed={coverSource === source}
+            aria-label={`Cover source ${source}`}
+            onClick={() => setCoverSource(source)}
+          >
+            {source}
+          </button>
+        ))}
+      </div>
       <div
         className="votion-gallery-grid"
         style={{

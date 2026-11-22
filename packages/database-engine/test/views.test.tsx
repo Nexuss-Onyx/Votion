@@ -12,6 +12,7 @@ import { CalendarView } from '../src/views/CalendarView/CalendarView.js';
 import { TimelineView } from '../src/views/TimelineView/TimelineView.js';
 import { GalleryView } from '../src/views/GalleryView/GalleryView.js';
 import { ListView } from '../src/views/ListView/ListView.js';
+import { RelationPicker } from '../src/views/RelationPicker.js';
 import { ViewRenderer } from '../src/views/ViewRenderer.js';
 import { applyViewQuery } from '../src/views/records.js';
 import { selectCollectionRecords } from '../src/views/records.js';
@@ -156,6 +157,40 @@ describe('GalleryView', () => {
     renderView('gallery');
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.getByText('Beta')).toBeInTheDocument();
+  });
+
+  it('switches the card cover source', () => {
+    renderView('gallery');
+    const none = screen.getByRole('button', { name: 'Cover source none' });
+    fireEvent.click(none);
+    expect(none).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+describe('RelationPicker', () => {
+  it('selects linked records and confirms the id list', () => {
+    const targetCollection = makeCollection(schema, {
+      id: 'collection-target-0000-0000-000000000001',
+      name: [['Target']],
+    });
+    const targets = [
+      titledRecord(targetCollection, 'One'),
+      titledRecord(targetCollection, 'Two'),
+    ];
+    const onConfirm = vi.fn();
+    render(
+      <RelationPicker
+        collection={targetCollection}
+        schema={targetCollection.schema}
+        records={targets}
+        selectedIds={[]}
+        onConfirm={onConfirm}
+        onClose={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole('checkbox', { name: 'One' }));
+    fireEvent.click(screen.getByRole('button', { name: /Done/ }));
+    expect(onConfirm).toHaveBeenCalledWith([targets[0]?.id]);
   });
 });
 

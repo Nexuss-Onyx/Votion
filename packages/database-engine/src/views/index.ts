@@ -8,6 +8,7 @@ export * from './engineContext.js';
 export * from './shared.js';
 export * from './ViewRenderer.js';
 export * from './CollectionViewRenderer.js';
+export * from './RelationPicker.js';
 export * from './TableView/index.js';
 export * from './BoardView/index.js';
 export * from './CalendarView/index.js';
