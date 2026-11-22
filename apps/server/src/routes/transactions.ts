@@ -1,10 +1,10 @@
 /** Atomic transaction pipeline: POST /api/v3/saveTransactions. */
 
 import type { FastifyInstance } from 'fastify';
-import type { Transaction } from '@votion/types';
+import type { RecordUpdatedEnvelope, Transaction } from '@votion/types';
 
 import { OperationError } from '../lib/jsonpatch.js';
-import { spaceEventsChannel, type SpaceEventMessage } from '../lib/redis.js';
+import { spaceEventsChannel } from '../lib/redis.js';
 import { saveTransactionsSchema } from '../schemas.js';
 
 export async function transactionRoutes(fastify: FastifyInstance): Promise<void> {
@@ -48,21 +48,52 @@ export async function transactionRoutes(fastify: FastifyInstance): Promise<void>
           requestId,
           request.userId,
         );
-        const versions: Record<string, number> = {};
-        for (const result of applied) Object.assign(versions, result.versions);
-        // Publish only after the storage transaction commits. The durable WAL
-        // remains authoritative if Redis is unavailable.
-        for (const spaceId of spaces) {
-          const message: SpaceEventMessage = {
+        const versionByRecord = new Map<string, number>();
+        for (const result of applied) {
+          for (const [recordId, version] of Object.entries(result.versions)) {
+            versionByRecord.set(recordId, version);
+          }
+        }
+
+        // Phase 6 consumes one canonical RecordUpdatedEnvelope per record.
+        // Build coarse patches from the committed row, not from request args,
+        // so multiple ops to a field publish its final value.
+        const changedPaths = new Map<string, Set<string>>();
+        const recordSpaces = new Map<string, string>();
+        for (const transaction of transactions) {
+          for (const operation of transaction.operations) {
+            const { table, id } = operation.pointer;
+            const key = `${table}:${id}`;
+            const fields = changedPaths.get(key) ?? new Set<string>();
+            const rootField = operation.path[0];
+            if (typeof rootField === 'string') fields.add(rootField);
+            changedPaths.set(key, fields);
+            recordSpaces.set(key, transaction.spaceId);
+          }
+        }
+        for (const [key, fields] of changedPaths) {
+          const [table, id] = key.split(':', 2);
+          if (table !== 'block' || !id) continue;
+          const block = await fastify.store.findBlockById(id);
+          if (!block) continue;
+          const patch: Record<string, unknown> = {};
+          for (const field of fields) {
+            if (field === 'properties') patch.properties = block.properties;
+            else if (field === 'format') patch.format = block.format;
+            else if (field === 'content') patch.content = block.content;
+          }
+          const message: RecordUpdatedEnvelope = {
             type: 'record_updated',
-            spaceId,
-            requestId,
-            userId: request.userId,
-            versions,
-            publishedAt: new Date().toISOString(),
+            table: 'block',
+            id,
+            version: versionByRecord.get(id) ?? block.version,
+            patch,
+            spaceId: recordSpaces.get(key),
+            lastEditedTime: block.lastEditedTime.getTime(),
+            lastEditedById: block.lastEditedById ?? undefined,
           };
           await fastify.publisher.publish(
-            spaceEventsChannel(spaceId),
+            spaceEventsChannel(recordSpaces.get(key) ?? block.spaceId),
             JSON.stringify(message),
           );
         }

@@ -11,6 +11,7 @@
 
 import { createHash } from 'node:crypto';
 
+import type { RecordUpdatedEnvelope } from '@votion/types';
 import { Redis } from 'ioredis';
 
 import { hasRedis, type ServerConfig } from '../config.js';
@@ -24,16 +25,8 @@ export function spaceEventsChannel(spaceId: string): string {
   return `${SPACE_EVENTS_PREFIX}${spaceId}${SPACE_EVENTS_SUFFIX}`;
 }
 
-/** Envelope published on `space:<space_id>:events`. */
-export interface SpaceEventMessage {
-  type: 'record_updated';
-  spaceId: string;
-  requestId: string;
-  userId: string;
-  /** New record versions keyed by record id. */
-  versions: Record<string, number>;
-  publishedAt: string;
-}
+/** Canonical per-record envelope published on `space:<space_id>:events`. */
+export type SpaceEventMessage = RecordUpdatedEnvelope;
 
 /** Minimal publisher contract used by routes. */
 export interface EventPublisher {

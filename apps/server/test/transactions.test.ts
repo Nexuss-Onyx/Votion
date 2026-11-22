@@ -21,6 +21,7 @@ describe('POST /api/v3/saveTransactions', () => {
     const block = await addBlock(store, user.workspace.id, { properties: { title: [['Before']] }, content: [anchor] });
     const afterId = randomUUID();
     const beforeId = randomUUID();
+    const secondBlock = await addBlock(store, user.workspace.id, { properties: { title: [['Second before']] } });
     const transactionId = randomUUID();
     const requestId = randomUUID();
     const response = await integrated.inject({
@@ -33,6 +34,7 @@ describe('POST /api/v3/saveTransactions', () => {
         { pointer: { table: 'block', id: block.id, spaceId: user.workspace.id }, path: ['content'], command: 'listAfter', args: { id: afterId, after: anchor } },
         { pointer: { table: 'block', id: block.id, spaceId: user.workspace.id }, path: ['content'], command: 'listBefore', args: { id: beforeId, before: anchor } },
         { pointer: { table: 'block', id: block.id, spaceId: user.workspace.id }, path: ['content'], command: 'listRemove', args: { id: afterId } },
+        { pointer: { table: 'block', id: secondBlock.id, spaceId: user.workspace.id }, path: ['properties', 'title'], command: 'set', args: [['Second after']] },
       ] }] },
     });
     expect(response.statusCode).toBe(200);
@@ -42,7 +44,26 @@ describe('POST /api/v3/saveTransactions', () => {
     expect(updated?.properties.metadata).toEqual({ flag: true, last: 'yes' });
     expect(updated?.content).toEqual([beforeId, anchor]);
     expect((await store.listTransactionRecords(user.workspace.id))).toHaveLength(1);
-    expect(publisher.messagesFor(spaceEventsChannel(user.workspace.id))).toHaveLength(1);
+    const events = publisher.messagesFor(spaceEventsChannel(user.workspace.id));
+    expect(events).toHaveLength(2);
+    expect(events.find((event) => event.id === block.id)).toMatchObject({
+      type: 'record_updated',
+      table: 'block',
+      id: block.id,
+      version: 2,
+      spaceId: user.workspace.id,
+      patch: {
+        properties: { title: [['After']], metadata: { flag: true, last: 'yes' } },
+        content: [beforeId, anchor],
+      },
+    });
+    expect(events.find((event) => event.id === secondBlock.id)).toMatchObject({
+      type: 'record_updated',
+      table: 'block',
+      id: secondBlock.id,
+      version: 2,
+      patch: { properties: { title: [['Second after']] } },
+    });
   });
 
   it('rolls back all effects when any operation in the batch fails', async () => {
