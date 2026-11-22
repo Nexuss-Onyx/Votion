@@ -39,15 +39,15 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsc -p tsconfig.test.json --noEmit && vitest run",
+    "build": "pnpm --filter @votion/types run build && tsc -p tsconfig.json",
+    "typecheck": "pnpm --filter @votion/types run build && tsc -p tsconfig.json --noEmit",
+    "test": "pnpm --filter @votion/types run build && tsc -p tsconfig.test.json --noEmit && vitest run",
     "test:watch": "vitest",
-    "test:transformer": "vitest run test/transformer.test.ts",
-    "test:query": "vitest run test/query.test.ts",
-    "test:client": "vitest run test/client.test.ts",
-    "test:components": "vitest run test/components.test.ts test/highlight.test.ts test/recent-pages.test.ts",
-    "provision": "tsc -p tsconfig.json && node dist/scripts/provision.js",
+    "test:transformer": "pnpm --filter @votion/types run build && vitest run test/transformer.test.ts",
+    "test:query": "pnpm --filter @votion/types run build && vitest run test/query.test.ts",
+    "test:client": "pnpm --filter @votion/types run build && vitest run test/client.test.ts",
+    "test:components": "pnpm --filter @votion/types run build && vitest run test/components.test.ts test/highlight.test.ts test/recent-pages.test.ts test/controller.test.ts test/provision.test.ts",
+    "provision": "pnpm --filter @votion/types run build && tsc -p tsconfig.json && node dist/scripts/provision.js",
     "lint": "eslint src --ext .ts,.tsx",
     "clean": "rm -rf dist"
   },

@@ -188,10 +188,14 @@ export function AppShell() {
 ```bash
 pnpm --filter @votion/search run build            # V-01  tsc emits dist/
 pnpm --filter @votion/search run test:transformer # V-02  54 tests
-pnpm --filter @votion/search run test:query       # V-03  49 tests
+pnpm --filter @votion/search run test:query       # V-03  50 tests
 pnpm turbo run typecheck                          # V-04  whole monorepo
 pnpm --filter @votion/search run test             # all 224 tests
 ```
+
+Each script first builds `@votion/types` (its `dist/` is what `@votion/search`
+compiles against), so the gates pass on a clean checkout without a prior
+`turbo run build`.
 
 Runtime dependencies: `meilisearch`, `react`, `lucide-react`, `@votion/types`.
 No `any`, no DOM-only imports in the pure layers (the query/indexer/client code
