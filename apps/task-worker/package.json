@@ -1,0 +1,47 @@
+{
+  "name": "@votion/task-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Votion asynchronous background worker fleet (BullMQ, cascade deletes, search indexing, rollups, media & export/import)",
+  "author": "Nexuss-Onyx <tadd4212@gmail.com>",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test --ext .ts",
+    "test": "vitest run",
+    "test:cascade": "vitest run test/cascade.test.ts",
+    "test:media": "vitest run test/media.test.ts",
+    "test:import-export": "vitest run test/import-export.test.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@votion/db": "workspace:*",
+    "@votion/search": "workspace:*",
+    "@votion/types": "workspace:*",
+    "archiver": "^7.0.1",
+    "bullmq": "^5.34.3",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.45.4",
+    "ioredis": "^5.4.2",
+    "open-graph-scraper": "^6.6.2",
+    "puppeteer-core": "^23.11.1",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.2",
+    "@types/ioredis-mock": "^8.2.8",
+    "@types/node": "^22.10.2",
+    "@votion/eslint-config": "workspace:*",
+    "@votion/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
+    "ioredis-mock": "^8.9.0",
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4"
+  }
+}

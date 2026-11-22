@@ -19,7 +19,7 @@
 | **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ✅ Completed | 9 / 9 |
 | **Phase 7: Access Control & Permissions** | `@votion/acl` | ✅ Completed | 8 / 8 |
 | **Phase 8: Search & Discovery Engine** | `@votion/search` | ✅ Completed | 7 / 7 |
-| **Phase 9: Background Worker Fleet** | `apps/task-worker` | ⬜ Not Started | 0 / 11 |
+| **Phase 9: Background Worker Fleet** | `apps/task-worker` | ✅ Completed | 11 / 11 |
 | **Phase 10: Web Application Shell** | `apps/web` | ⬜ Not Started | 0 / 16 |
 | **Phase 11: Developer API & Webhooks** | `apps/server/v1` | ⬜ Not Started | 0 / 8 |
 | **Phase 12: Wasmer Edge Deployment** | `wasmer.toml`, Wasmer CLI | ⬜ Not Started | 0 / 8 |
@@ -292,22 +292,22 @@
 
 ## Phase 9: Background Worker Fleet (`apps/task-worker`)
 
-- [ ] Configure BullMQ job queues connected to Redis.
-- [ ] Implement `HierarchyCascadeWorker`:
-  - [ ] Cascade soft-deletion (`alive: false`) across entire nested sub-trees.
-  - [ ] Cascade permission overrides down descendant blocks.
-- [ ] Implement `SearchIndexingWorker`:
-  - [ ] Listen to transaction changes and update Meilisearch records asynchronously.
-- [ ] Implement `RollupWorker`:
-  - [ ] Recalculate dependent rollups when linked collection items change.
-- [ ] Implement `MediaProcessorWorker`:
-  - [ ] Generate image thumbnails (Sharp).
-  - [ ] Extract OpenGraph metadata for bookmark blocks.
-- [ ] Implement `ExportWorker`:
-  - [ ] Generate Markdown + CSV zip archives.
-  - [ ] Generate PDF exports via headless Chromium (Puppeteer).
-- [ ] Implement `ImportWorker`:
-  - [ ] Parse uploaded Markdown, HTML, and CSV files into Notion block trees.
+- [x] Configure BullMQ job queues connected to Redis.
+- [x] Implement `HierarchyCascadeWorker`:
+  - [x] Cascade soft-deletion (`alive: false`) across entire nested sub-trees.
+  - [x] Cascade permission overrides down descendant blocks.
+- [x] Implement `SearchIndexingWorker`:
+  - [x] Listen to transaction changes and update Meilisearch records asynchronously.
+- [x] Implement `RollupWorker`:
+  - [x] Recalculate dependent rollups when linked collection items change.
+- [x] Implement `MediaProcessorWorker`:
+  - [x] Generate image thumbnails (Sharp).
+  - [x] Extract OpenGraph metadata for bookmark blocks.
+- [x] Implement `ExportWorker`:
+  - [x] Generate Markdown + CSV zip archives.
+  - [x] Generate PDF exports via headless Chromium (Puppeteer).
+- [x] Implement `ImportWorker`:
+  - [x] Parse uploaded Markdown, HTML, and CSV files into Notion block trees.
 
 ---
 
