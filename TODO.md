@@ -17,7 +17,7 @@
 | **Phase 4: Database & Collection Engine** | `@votion/database-engine` | ⬜ Not Started | 0 / 20 |
 | **Phase 5: Backend API & Transactions** | `apps/server` | ⬜ Not Started | 0 / 14 |
 | **Phase 6: Real-Time Gateway & Collab** | `apps/sync-worker` | ⬜ Not Started | 0 / 9 |
-| **Phase 7: Access Control & Permissions** | `@votion/acl` | ⬜ Not Started | 0 / 8 |
+| **Phase 7: Access Control & Permissions** | `@votion/acl` | ✅ Completed | 8 / 8 |
 | **Phase 8: Search & Discovery Engine** | `@votion/search` | ⬜ Not Started | 0 / 7 |
 | **Phase 9: Background Worker Fleet** | `apps/task-worker` | ⬜ Not Started | 0 / 11 |
 | **Phase 10: Web Application Shell** | `apps/web` | ⬜ Not Started | 0 / 16 |
@@ -255,16 +255,16 @@
 
 ## Phase 7: Access Control & Permissions (`@votion/acl`)
 
-- [ ] Implement Workspace RBAC (Owner, Admin, Member, Guest).
-- [ ] Build Recursive Hierarchy Graph Traverser:
-  - [ ] Walk up `parent_id` chain from Block to Root Page to Workspace.
-  - [ ] Resolve inherited permissions (`read`, `comment`, `write`, `admin`).
-- [ ] Build Permission Override Engine:
-  - [ ] Explicit user/teamspace access rules stored in `permissions` table.
-- [ ] Implement Redis-backed ACL cache with invalidation hooks on permission edits.
-- [ ] Implement Public Web Publishing Gateway:
-  - [ ] Custom domain or public slug router.
-  - [ ] Anonymous read-only permissions with optional `noindex` header.
+- [x] Implement Workspace RBAC (Owner, Admin, Member, Guest).
+- [x] Build Recursive Hierarchy Graph Traverser:
+  - [x] Walk up `parent_id` chain from Block to Root Page to Workspace.
+  - [x] Resolve inherited permissions (`read`, `comment`, `write`, `admin`).
+- [x] Build Permission Override Engine:
+  - [x] Explicit user/teamspace access rules stored in `permissions` table.
+- [x] Implement Redis-backed ACL cache with invalidation hooks on permission edits.
+- [x] Implement Public Web Publishing Gateway:
+  - [x] Custom domain or public slug router.
+  - [x] Anonymous read-only permissions with optional `noindex` header.
 
 ---
 
